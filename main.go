@@ -121,9 +121,6 @@ func main() {
 		return nil
 	})
 
-	fmt.Println(maxPathShow)
-
-	return
 	f, err := tea.LogToFile("debug.log", "debug")
 
 	if err != nil {
