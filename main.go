@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -81,7 +83,6 @@ func getTerminalSize() (int, int, error) {
 	}
 
 	width, height, err := term.GetSize(fd)
-
 	if err != nil {
 		return 80, 25, err
 	}
@@ -90,7 +91,39 @@ func getTerminalSize() (int, int, error) {
 }
 
 func main() {
+	// Experiment With filepath.Walk
 
+	maxPathShow := make([]string, 20)
+
+	pathRecord := 0
+	filepath.WalkDir("D:/", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
+			return err
+		}
+
+		info, _ := d.Info()
+		// fmt.Printf("fullPath: %s \t name: %s  isDir: %v\n", path, info.Name(), info.IsDir())
+
+		if info.IsDir() {
+			// fmt.Print("A")
+			return nil
+		}
+
+		// fmt.Print(len(maxPathShow))
+		if pathRecord > 20 {
+			return filepath.SkipAll
+		}
+
+		pathRecord++
+		maxPathShow = append(maxPathShow, path)
+
+		return nil
+	})
+
+	fmt.Println(maxPathShow)
+
+	return
 	f, err := tea.LogToFile("debug.log", "debug")
 
 	if err != nil {

@@ -10,8 +10,9 @@ var divStyle = lipgloss.NewStyle().
 	BorderForeground(lipgloss.Color("63"))
 
 type Div struct {
-	model ListModel
-	width int
+	model  ListModel
+	width  int
+	height int
 }
 
 func (m Div) Init() tea.Cmd {
@@ -32,12 +33,13 @@ func (m Div) Update(msg tea.Msg) (Div, tea.Cmd) {
 }
 
 func (m Div) View() string {
-	return divStyle.Width(m.width).Render(m.model.View())
+	return divStyle.Width(m.width).Height(m.height).Render(m.model.View())
 }
 
 func NewDiv(maxWidth, maxHeight int) Div {
 	return Div{
-		model: NewListModel(maxWidth),
-		width: int(float64(maxWidth) * 0.77),
+		model:  NewListModel(maxWidth),
+		width:  int(float64(maxWidth) * 0.77),
+		height: int(float64(maxHeight) * 0.75),
 	}
 }
