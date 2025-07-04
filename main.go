@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io/fs"
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -15,6 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 
+	"github.com/ikhwanal/everywhere_anywhere/src/core"
 	"github.com/ikhwanal/everywhere_anywhere/src/models"
 )
 
@@ -29,20 +28,36 @@ func (m RootModel) Init() tea.Cmd {
 }
 
 func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmds []tea.Cmd
 	var cmd tea.Cmd
+
+	log.Print(m.searchModel.TextInput.Value())
 	switch msg := msg.(type) {
+	case core.SearchTypeChangedMsg:
+		m.divListModel, cmd = m.divListModel.Update(msg)
+		if cmd != nil {
+			cmds = append(cmds, cmd)
+		}
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlC, tea.KeyEsc:
 			return m, tea.Quit
-		case tea.KeyDown, tea.KeyUp:
-			m.divListModel, cmd = m.divListModel.Update(msg)
 		case tea.KeyRunes, tea.KeyBackspace:
 			m.searchModel, cmd = m.searchModel.Update(msg)
+
+			if cmd != nil {
+				cmds = append(cmds, cmd)
+			}
+		case tea.KeyDown, tea.KeyUp:
+			m.divListModel, cmd = m.divListModel.Update(msg)
+
+			if cmd != nil {
+				cmds = append(cmds, cmd)
+			}
 		}
 	}
 
-	return m, cmd
+	return m, tea.Batch(cmds...)
 }
 
 func (m RootModel) View() string {
@@ -91,36 +106,6 @@ func getTerminalSize() (int, int, error) {
 }
 
 func main() {
-	// Experiment With filepath.Walk
-
-	maxPathShow := make([]string, 20)
-
-	pathRecord := 0
-	filepath.WalkDir("D:/", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
-		}
-
-		info, _ := d.Info()
-		// fmt.Printf("fullPath: %s \t name: %s  isDir: %v\n", path, info.Name(), info.IsDir())
-
-		if info.IsDir() {
-			// fmt.Print("A")
-			return nil
-		}
-
-		// fmt.Print(len(maxPathShow))
-		if pathRecord > 20 {
-			return filepath.SkipAll
-		}
-
-		pathRecord++
-		maxPathShow = append(maxPathShow, path)
-
-		return nil
-	})
-
 	f, err := tea.LogToFile("debug.log", "debug")
 
 	if err != nil {

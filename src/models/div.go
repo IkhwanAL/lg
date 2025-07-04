@@ -3,6 +3,7 @@ package models
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/ikhwanal/everywhere_anywhere/src/core"
 )
 
 var divStyle = lipgloss.NewStyle().
@@ -23,6 +24,8 @@ func (m Div) Update(msg tea.Msg) (Div, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
+	case core.SearchTypeChangedMsg:
+		m.model, cmd = m.model.Update(msg)
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyUp, tea.KeyDown:

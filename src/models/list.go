@@ -5,6 +5,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/ikhwanal/everywhere_anywhere/src/core"
 )
 
 var selectedStyle = lipgloss.NewStyle().
@@ -42,6 +43,8 @@ func (m ListModel) View() string {
 
 func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	switch msg := msg.(type) {
+	case core.SearchTypeChangedMsg:
+		m.list = core.SearchFile(msg.SearchType)
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyUp:
@@ -60,27 +63,6 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 
 func NewListModel(maxWidth int) ListModel {
 	return ListModel{
-		list: []string{
-			"asc",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-			"asd",
-		},
 		maxWidth: int(float64(maxWidth) * 0.77),
 		cursor:   0,
 	}
