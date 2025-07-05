@@ -31,7 +31,6 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
-	log.Print(m.searchModel.TextInput.Value())
 	switch msg := msg.(type) {
 	case core.SearchTypeChangedMsg:
 		m.divListModel, cmd = m.divListModel.Update(msg)
