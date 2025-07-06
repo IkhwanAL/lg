@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -20,7 +21,8 @@ var normalStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("15"))
 
 type ListModel struct {
-	overflow   int
+	overflow   bool
+	position   int
 	cursor     int
 	maxWidth   int
 	viewHeight int
@@ -29,6 +31,7 @@ type ListModel struct {
 }
 
 func (m ListModel) Init() tea.Cmd {
+	fmt.Print(len(m.list))
 	return nil
 }
 
@@ -66,7 +69,13 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		case tea.KeyUp:
 			if m.cursor > 0 {
 				m.cursor--
+				m.overflow = false
 			}
+
+			if m.position > 0 {
+				m.position -= 1
+			}
+
 		case tea.KeyDown:
 			if m.list == nil {
 				return m, nil
@@ -75,15 +84,23 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 			if m.cursor < m.viewHeight-1 {
 				m.cursor++
 			} else {
-				m.overflow += 1
+				m.overflow = true
 			}
 
-			if m.overflow > 0 {
-				position := m.overflow + m.viewHeight
+			if m.position < len(m.list) {
+				m.position += 1
 
+			}
+
+			log.Printf("Key Down Position %d Total List %d", m.position, len(m.list))
+			if m.position == len(m.list) {
+				return m, nil
+			}
+
+			log.Printf("Key Down Position %d View Height %d", m.position, m.viewHeight-1)
+			if m.position > m.viewHeight-1 && m.overflow {
 				m.viewState = util.ShiftLeftArray(m.viewState)
-				m.viewState[m.viewHeight-2] = m.list[position-1]
-				m.viewState[m.viewHeight-1] = m.list[position]
+				m.viewState[m.viewHeight-1] = m.list[m.position]
 			}
 		}
 	}
@@ -93,7 +110,8 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 
 func NewListModel(maxWidth int) ListModel {
 	return ListModel{
-		overflow:   0,
+		overflow:   false,
+		position:   0,
 		maxWidth:   int(float64(maxWidth) * 0.77),
 		cursor:     0,
 		viewHeight: 5,

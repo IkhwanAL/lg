@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// #define MAX_FILE 20
+// #define MAX_FILE 10
 var MAX_FILE = 10
 
 // TODO Need A Test File
@@ -38,7 +38,7 @@ func SearchFile(key string) ([]string, error) {
 			return nil
 		}
 
-		if len(maxPathShow) > MAX_FILE {
+		if len(maxPathShow) >= MAX_FILE {
 			return filepath.SkipAll
 		}
 
