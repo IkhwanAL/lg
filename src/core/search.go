@@ -21,7 +21,7 @@ func SearchFile(key string) ([]string, error) {
 
 	filepath.WalkDir("D:/", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return filepath.SkipDir
+			return err
 		}
 
 		info, _ := d.Info()
