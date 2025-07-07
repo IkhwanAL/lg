@@ -105,6 +105,9 @@ func getTerminalSize() (int, int, error) {
 }
 
 func main() {
+	// asd, _ := core.SearchFile("Realme")
+	// fmt.Print(asd)
+	// return
 	f, err := tea.LogToFile("debug.log", "debug")
 
 	if err != nil {

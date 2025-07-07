@@ -1,3 +1,10 @@
+/*
+*
+For your consideration i even don't know how i ended up create my own list
+maybe im crazy or just to confident that i can do but look at the beauty at
+this code in below it work and i created it myself (well of course there some
+code from ai but i ditch because it suddenly became very complicated)
+*/
 package models
 
 import (
@@ -42,6 +49,7 @@ func (m ListModel) View() string {
 	for i := m.head; i < m.tail; i++ {
 		value := m.list[i]
 
+		// Part of Head Tail Calculation
 		itemIndex := i - m.head
 
 		if m.cursor == itemIndex {
@@ -62,6 +70,18 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		log.Printf("Error Search File: %v", err)
 
 		m.list = newList
+
+		// TODO Need A Test File For Sliding Window Tail And Head Position
+		// log.Printf("Search: Tail %d - Head %d = %d > List %d = %v", m.tail, m.head, m.tail-m.head, len(m.list), m.tail-m.head > len(m.list))
+		if (m.tail-1)-m.head > len(m.list) {
+			m.head = (len(m.list) % m.viewHeight) - 1
+			m.tail = len(m.list)
+			m.position = m.tail - 1
+			m.cursor = m.position
+		}
+
+		log.Printf("Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
+
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyUp:
@@ -73,7 +93,9 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 				m.cursor--
 			}
 
-			m.position -= 1
+			if m.position > 0 {
+				m.position -= 1
+			}
 		case tea.KeyDown:
 			if m.list == nil {
 				return m, nil
@@ -89,6 +111,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		}
 	}
 
+	// Head tail calculation
 	if m.position > m.tail-1 && m.tail < len(m.list) {
 		m.tail += 1
 		m.head += 1
@@ -99,7 +122,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		m.tail -= 1
 	}
 
-	log.Printf("Position %d, Head %d, Tail %d", m.position, m.head, m.tail-1)
+	log.Printf("Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 
 	return m, nil
 }

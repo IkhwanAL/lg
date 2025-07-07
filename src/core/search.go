@@ -10,7 +10,6 @@ import (
 // #define MAX_FILE 10
 var MAX_FILE = 10
 
-// TODO Need A Test File
 func SearchFile(key string) ([]string, error) {
 
 	if key == "" {
@@ -18,6 +17,9 @@ func SearchFile(key string) ([]string, error) {
 	}
 
 	var maxPathShow []string
+
+	// TODO
+	// Improve Search
 
 	// TODO
 	// do i need to consider adding C:/
