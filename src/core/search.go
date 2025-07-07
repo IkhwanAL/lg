@@ -19,6 +19,17 @@ func SearchFile(key string) ([]string, error) {
 
 	var maxPathShow []string
 
+	// TODO
+	// do i need to consider adding C:/
+	// because C:/ has soo much private information that windows user shouldn't know
+	// It means lots of filtering that other partition shouldn't do
+
+	// TODO
+	// i should highlight directory name
+
+	// TODO
+	// I need to check their what partition they have
+	// or partition filter only allow to find in one partition
 	filepath.WalkDir("D:/", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -34,7 +45,7 @@ func SearchFile(key string) ([]string, error) {
 			return nil
 		}
 
-		if !strings.ContainsAny(info.Name(), key) {
+		if !strings.Contains(info.Name(), key) {
 			return nil
 		}
 
