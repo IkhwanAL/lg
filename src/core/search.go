@@ -3,12 +3,15 @@ package core
 import (
 	"errors"
 	"io/fs"
+	"log"
+	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 // #define MAX_FILE 10
-var MAX_FILE = 10
+var MAX_FILE = 25
 
 func SearchFile(key string) ([]string, error) {
 	if key == "" {
@@ -19,6 +22,8 @@ func SearchFile(key string) ([]string, error) {
 
 	// TODO
 	// Improve Search
+	// How to improve search if we search thousand directories
+	// does goroutine help?
 
 	// TODO
 	// do i need to consider adding C:/
@@ -31,22 +36,20 @@ func SearchFile(key string) ([]string, error) {
 	// TODO
 	// I need to check their what partition they have
 	// or partition filter only allow to find in one partition
-	filepath.WalkDir("D:/", func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir("D:/", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		info, _ := d.Info()
+		if d.IsDir() {
+			if d.Name() == "System Volume Information" || d.Name() == "$RECYCLE.BIN" {
+				return filepath.SkipDir
+			}
 
-		if info.IsDir() && strings.Contains(info.Name(), "$") {
-			return filepath.SkipDir
-		}
-
-		if info.IsDir() {
 			return nil
 		}
 
-		if !strings.Contains(info.Name(), key) {
+		if !strings.Contains(d.Name(), key) {
 			return nil
 		}
 
@@ -59,5 +62,110 @@ func SearchFile(key string) ([]string, error) {
 		return nil
 	})
 
-	return maxPathShow, nil
+	return maxPathShow, err
+}
+
+func SearchFileV2(key string) ([]string, error) {
+	if key == "" {
+		return nil, errors.New("key is empty")
+	}
+
+	// ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	// defer cancel()
+
+	dirs, err := os.ReadDir("D:/")
+
+	if err != nil {
+		return nil, err
+	}
+
+	var results []string
+	var wg sync.WaitGroup
+	var mu sync.RWMutex
+
+	for _, dir := range dirs {
+
+		_, err := dir.Info()
+
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+
+		if strings.Contains(dir.Name(), ".") {
+			continue
+		}
+
+		if dir.Name() == "System Volume Information" || dir.Name() == "Recovery" {
+			continue
+		}
+
+		wg.Add(1)
+		go func(dirName string) {
+			defer wg.Done()
+			err = filepath.WalkDir("D:/"+dirName, func(path string, d fs.DirEntry, err error) error {
+				if err != nil {
+					return err
+				}
+
+				if d.IsDir() {
+					return nil
+				}
+
+				if !strings.Contains(d.Name(), key) {
+					return nil
+				}
+
+				mu.Lock()
+				results = append(results, path)
+				mu.Unlock()
+
+				return nil
+			})
+		}(dir.Name())
+
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+	}
+
+	wg.Wait()
+
+	return results, err
+}
+
+func SearchFileV3(key string) ([]string, error) {
+	if key == "" {
+		return nil, errors.New("key is empty")
+	}
+
+	dirs, err := os.ReadDir("D:/")
+
+	if err != nil {
+		return nil, err
+	}
+
+	var validDirs []string
+	for _, dir := range dirs {
+
+		_, err := dir.Info()
+
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+
+		if strings.Contains(dir.Name(), ".") {
+			continue
+		}
+
+		if dir.Name() == "System Volume Information" || dir.Name() == "Recovery" {
+			continue
+		}
+
+		validDirs = append(validDirs, dir.Name())
+	}
+
+	return nil, nil
 }

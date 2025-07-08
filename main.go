@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -106,7 +107,28 @@ func getTerminalSize() (int, int, error) {
 	return width, height, nil
 }
 
+func benchmarkTest() {
+	key := "code.png"
+
+	fmt.Println("Testing normal search...")
+	start := time.Now()
+	results, _ := core.SearchFile(key)
+	fmt.Printf("Normal search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
+
+	fmt.Println("Optimized search...")
+	start = time.Now()
+	results, _ = core.SearchFileV2(key)
+	// fmt.Print(results)
+	fmt.Printf("Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
+
+	return
+}
+
 func main() {
+
+	benchmarkTest()
+
+	return
 	f, err := tea.LogToFile("debug.log", "debug")
 
 	if err != nil {
