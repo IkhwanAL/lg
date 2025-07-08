@@ -11,7 +11,6 @@ import (
 var MAX_FILE = 10
 
 func SearchFile(key string) ([]string, error) {
-
 	if key == "" {
 		return nil, errors.New("key is empty")
 	}

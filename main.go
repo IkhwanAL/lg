@@ -20,7 +20,6 @@ import (
 type RootModel struct {
 	divListModel models.Div
 	searchModel  models.SearchModel
-	// active      string
 }
 
 func (m RootModel) Init() tea.Cmd {
@@ -33,9 +32,11 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case core.SearchTypeChangedMsg:
-		m.divListModel, cmd = m.divListModel.Update(msg)
-		if cmd != nil {
-			cmds = append(cmds, cmd)
+		if msg.SearchType == m.searchModel.TextInput.Value() {
+			m.divListModel, cmd = m.divListModel.Update(msg)
+			if cmd != nil {
+				cmds = append(cmds, cmd)
+			}
 		}
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -105,9 +106,6 @@ func getTerminalSize() (int, int, error) {
 }
 
 func main() {
-	// asd, _ := core.SearchFile("Realme")
-	// fmt.Print(asd)
-	// return
 	f, err := tea.LogToFile("debug.log", "debug")
 
 	if err != nil {

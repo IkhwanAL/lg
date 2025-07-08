@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -35,11 +37,11 @@ func (m SearchModel) Update(msg tea.Msg) (SearchModel, tea.Cmd) {
 
 	m.TextInput, cmd = m.TextInput.Update(msg)
 
-	searchCmd := func() tea.Msg {
+	debounceSearch := tea.Tick(300*time.Millisecond, func(t time.Time) tea.Msg {
 		return core.SearchTypeChangedMsg{SearchType: m.TextInput.Value()}
-	}
+	})
 
-	return m, tea.Batch(cmd, searchCmd)
+	return m, tea.Batch(cmd, debounceSearch)
 }
 
 func NewSearchModel(maxWidth int) SearchModel {
