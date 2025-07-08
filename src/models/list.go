@@ -66,18 +66,22 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case core.SearchTypeChangedMsg:
 		newList, err := core.SearchFile(msg.SearchType)
-
 		log.Printf("Error Search File: %v", err)
 
 		m.list = newList
 
 		// TODO Need A Test File For Sliding Window Tail And Head Position
-		// log.Printf("Search: Tail %d - Head %d = %d > List %d = %v", m.tail, m.head, m.tail-m.head, len(m.list), m.tail-m.head > len(m.list))
+		// log.Printf("Search: Tail %d - Head %d = %d > List %d = %v", m.tail-1, m.head, (m.tail-1)-m.head, len(m.list), m.tail-m.head > len(m.list))
 		if (m.tail-1)-m.head > len(m.list) {
 			m.head = (len(m.list) % m.viewHeight) - 1
 			m.tail = len(m.list)
 			m.position = m.tail - 1
 			m.cursor = m.position
+		} else {
+			m.head = 0
+			m.tail = 5
+			m.position = 0
+			m.cursor = 0
 		}
 
 		// log.Printf("Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
@@ -132,7 +136,7 @@ func NewListModel(maxWidth int) ListModel {
 		position:   0,
 		cursor:     0,
 		viewHeight: 5,
-		tail:       5,
+		tail:       1,
 		head:       0,
 		maxWidth:   int(float64(maxWidth) * 0.77),
 	}

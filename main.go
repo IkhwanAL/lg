@@ -32,6 +32,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case core.SearchTypeChangedMsg:
+		// log.Printf("Main %s and %s", msg.SearchType, m.searchModel.TextInput.Value())
 		if msg.SearchType == m.searchModel.TextInput.Value() {
 			m.divListModel, cmd = m.divListModel.Update(msg)
 			if cmd != nil {
