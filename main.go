@@ -12,15 +12,15 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"golang.org/x/term"
 
 	"github.com/ikhwanal/everywhere_anywhere/src/core"
 	"github.com/ikhwanal/everywhere_anywhere/src/models"
+	"golang.org/x/term"
 )
 
 type RootModel struct {
-	divListModel models.Div
 	searchModel  models.SearchModel
+	divListModel models.Div
 }
 
 func (m RootModel) Init() tea.Cmd {
@@ -110,8 +110,9 @@ func getTerminalSize() (int, int, error) {
 func benchmarkTest() {
 	key := "code.png"
 
-	fmt.Println("Testing normal search...")
 	start := time.Now()
+
+	fmt.Println("Normal search...")
 	results, _ := core.SearchFile(key)
 	fmt.Printf("Normal search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
 
@@ -121,6 +122,12 @@ func benchmarkTest() {
 	// fmt.Print(results)
 	fmt.Printf("Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
 
+	fmt.Println("Very Optimized search...")
+	start = time.Now()
+	results, _ = core.SearchFileV3(key)
+	// fmt.Print(results)
+	fmt.Printf("Very Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
+
 	return
 }
 
@@ -129,6 +136,7 @@ func main() {
 	benchmarkTest()
 
 	return
+
 	f, err := tea.LogToFile("debug.log", "debug")
 
 	if err != nil {

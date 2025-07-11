@@ -42,7 +42,7 @@ func (m Div) View() string {
 func NewDiv(maxWidth, maxHeight int) Div {
 	return Div{
 		model:  NewListModel(maxWidth),
-		width:  int(float64(maxWidth) * 0.77),
+		width:  int(float64(maxWidth) * 0.5),
 		height: int(float64(maxHeight) * 0.75),
 	}
 }

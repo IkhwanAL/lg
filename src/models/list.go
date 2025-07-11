@@ -3,7 +3,8 @@
 For your consideration i even don't know how i ended up create my own list
 maybe im crazy or just to confident that i can do but look at the beauty at
 this code in below it work and i created it myself (well of course there some
-code from ai but i ditch because it suddenly became very complicated)
+code from ai but i ditch the code because it became complicated suddenly
+and i dont want that)
 */
 package models
 
@@ -53,9 +54,9 @@ func (m ListModel) View() string {
 		itemIndex := i - m.head
 
 		if m.cursor == itemIndex {
-			itemLists[itemIndex] = selectedStyle.Width(m.maxWidth).Render("> " + value)
+			itemLists[itemIndex] = selectedStyle.Width(m.maxWidth).Render(value)
 		} else {
-			itemLists[itemIndex] = normalStyle.Width(m.maxWidth).Render("  " + value)
+			itemLists[itemIndex] = normalStyle.Width(m.maxWidth).Render(value)
 		}
 	}
 
@@ -65,13 +66,16 @@ func (m ListModel) View() string {
 func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case core.SearchTypeChangedMsg:
-		newList, err := core.SearchFile(msg.SearchType)
+		newList, err := core.SearchFileV2(msg.SearchType)
 		log.Printf("Error Search File: %v", err)
 
 		m.list = newList
 
 		// TODO Need A Test File For Sliding Window Tail And Head Position
 		// log.Printf("Search: Tail %d - Head %d = %d > List %d = %v", m.tail-1, m.head, (m.tail-1)-m.head, len(m.list), m.tail-m.head > len(m.list))
+
+		// Look At This Beauty
+		// **Chef French Kiss**
 		if (m.tail-1)-m.head > len(m.list) {
 			m.head = (len(m.list) % m.viewHeight) - 1
 			m.tail = len(m.list)
@@ -138,6 +142,6 @@ func NewListModel(maxWidth int) ListModel {
 		viewHeight: 5,
 		tail:       1,
 		head:       0,
-		maxWidth:   int(float64(maxWidth) * 0.77),
+		maxWidth:   int(float64(maxWidth) * 0.5),
 	}
 }

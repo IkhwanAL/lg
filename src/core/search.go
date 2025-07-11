@@ -13,6 +13,7 @@ import (
 // #define MAX_FILE 10
 var MAX_FILE = 25
 
+// 2.5-ish second
 func SearchFile(key string) ([]string, error) {
 	if key == "" {
 		return nil, errors.New("key is empty")
@@ -65,13 +66,11 @@ func SearchFile(key string) ([]string, error) {
 	return maxPathShow, err
 }
 
+// 1.8 second
 func SearchFileV2(key string) ([]string, error) {
 	if key == "" {
 		return nil, errors.New("key is empty")
 	}
-
-	// ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	// defer cancel()
 
 	dirs, err := os.ReadDir("D:/")
 
@@ -81,7 +80,7 @@ func SearchFileV2(key string) ([]string, error) {
 
 	var results []string
 	var wg sync.WaitGroup
-	var mu sync.RWMutex
+	var mu sync.Mutex
 
 	for _, dir := range dirs {
 

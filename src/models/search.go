@@ -37,7 +37,7 @@ func (m SearchModel) Update(msg tea.Msg) (SearchModel, tea.Cmd) {
 
 	m.TextInput, cmd = m.TextInput.Update(msg)
 
-	debounceSearch := tea.Tick(300*time.Millisecond, func(t time.Time) tea.Msg {
+	debounceSearch := tea.Tick(500*time.Millisecond, func(t time.Time) tea.Msg {
 		return core.SearchTypeChangedMsg{SearchType: m.TextInput.Value()}
 	})
 
@@ -48,7 +48,7 @@ func NewSearchModel(maxWidth int) SearchModel {
 	search := textinput.New()
 	search.Placeholder = "Search File..."
 
-	search.Width = int(float64(maxWidth) * 0.75)
+	search.Width = int(float64(maxWidth) * 0.48)
 
 	search.Focus()
 
