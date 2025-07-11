@@ -1,6 +1,6 @@
 # What this Project About
 
-A Search File Explorer In Terminal 
+A Search File In Terminal 
 
 #  Motivation
 
