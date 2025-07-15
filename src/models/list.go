@@ -66,7 +66,7 @@ func (m ListModel) View() string {
 func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case core.SearchTypeChangedMsg:
-		newList, err := core.SearchFileV2(msg.SearchType)
+		newList, err := core.SearchFileV3(msg.SearchType)
 		log.Printf("Error Search File: %v", err)
 
 		m.list = newList

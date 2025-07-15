@@ -10,8 +10,16 @@ import (
 	"sync"
 )
 
+var SKIP_KNOWN_DIRECTIRIES = []string{
+	"node_modules",
+	".git",
+	"Recovery",
+	"System Volume Information",
+	"$RECYCLE.BIN",
+}
+
 // #define MAX_FILE 10
-var MAX_FILE = 25
+var MAX_FILE = 1000
 
 // 2.5-ish second
 func SearchFile(key string) ([]string, error) {
@@ -43,7 +51,7 @@ func SearchFile(key string) ([]string, error) {
 		}
 
 		if d.IsDir() {
-			if d.Name() == "System Volume Information" || d.Name() == "$RECYCLE.BIN" {
+			if d.Name() == "System Volume Information" || d.Name() == "$RECYCLE.BIN" || d.Name() == "Recovery" {
 				return filepath.SkipDir
 			}
 
@@ -95,7 +103,7 @@ func SearchFileV2(key string) ([]string, error) {
 			continue
 		}
 
-		if dir.Name() == "System Volume Information" || dir.Name() == "Recovery" {
+		if dir.Name() == "System Volume Information" || dir.Name() == "Recovery" || dir.Name() == "$RECYCLE.BIN" {
 			continue
 		}
 
@@ -134,37 +142,54 @@ func SearchFileV2(key string) ([]string, error) {
 	return results, err
 }
 
+// 0.5s or < 1s
 func SearchFileV3(key string) ([]string, error) {
 	if key == "" {
 		return nil, errors.New("key is empty")
 	}
 
-	dirs, err := os.ReadDir("D:/")
+	var wg sync.WaitGroup
+
+	ch := make(chan string, 5)
+
+	wg.Add(1)
+	go search("D:/", key, ch, &wg)
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	var result []string
+
+	for path := range ch {
+		result = append(result, path)
+	}
+
+	return result, nil
+}
+
+func search(rootDir string, fileToSearch string, result chan<- string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	dir, err := os.ReadDir(rootDir)
 
 	if err != nil {
-		return nil, err
+		log.Print(err)
+		return
 	}
 
-	var validDirs []string
-	for _, dir := range dirs {
+	for _, d := range dir {
+		if d.IsDir() {
+			wg.Add(1)
+			go search(rootDir+d.Name()+"/", fileToSearch, result, wg)
 
-		_, err := dir.Info()
-
-		if err != nil {
-			log.Print(err)
 			continue
 		}
 
-		if strings.Contains(dir.Name(), ".") {
+		if !strings.Contains(d.Name(), fileToSearch) {
 			continue
 		}
 
-		if dir.Name() == "System Volume Information" || dir.Name() == "Recovery" {
-			continue
-		}
-
-		validDirs = append(validDirs, dir.Name())
+		result <- rootDir + d.Name()
 	}
-
-	return nil, nil
 }

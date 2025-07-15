@@ -110,32 +110,25 @@ func getTerminalSize() (int, int, error) {
 func benchmarkTest() {
 	key := "code.png"
 
-	start := time.Now()
-
 	fmt.Println("Normal search...")
+	start := time.Now()
 	results, _ := core.SearchFile(key)
 	fmt.Printf("Normal search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
 
 	fmt.Println("Optimized search...")
 	start = time.Now()
 	results, _ = core.SearchFileV2(key)
-	// fmt.Print(results)
 	fmt.Printf("Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
 
 	fmt.Println("Very Optimized search...")
 	start = time.Now()
 	results, _ = core.SearchFileV3(key)
-	// fmt.Print(results)
 	fmt.Printf("Very Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
 
 	return
 }
 
 func main() {
-
-	benchmarkTest()
-
-	return
 
 	f, err := tea.LogToFile("debug.log", "debug")
 
