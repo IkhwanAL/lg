@@ -23,7 +23,7 @@ var selectedStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("15"))
 
 var normalStyle = lipgloss.NewStyle().
-	Padding(0, 1).Bold(true).
+	Padding(0, 2).Bold(true).
 	Foreground(lipgloss.Color("15"))
 
 type ListModel struct {
@@ -44,7 +44,7 @@ func (m ListModel) View() string {
 	itemLists := make([]string, m.viewHeight)
 
 	if m.list == nil {
-		return ""
+		return normalStyle.Width(m.maxWidth).Render("-- File Not Found --")
 	}
 
 	for i := m.head; i < m.tail; i++ {
@@ -54,12 +54,11 @@ func (m ListModel) View() string {
 		itemIndex := i - m.head
 
 		if m.cursor == itemIndex {
-			itemLists[itemIndex] = selectedStyle.Width(m.maxWidth).Render(value)
+			itemLists[itemIndex] = selectedStyle.Width(m.maxWidth).Render(value + ";")
 		} else {
-			itemLists[itemIndex] = normalStyle.Width(m.maxWidth).Render(value)
+			itemLists[itemIndex] = normalStyle.Width(m.maxWidth).Render(value + ";")
 		}
 	}
-
 	return strings.Join(itemLists, "\n")
 }
 
@@ -83,7 +82,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 			m.cursor = m.position
 		} else {
 			m.head = 0
-			m.tail = 5
+			m.tail = m.viewHeight
 			m.position = 0
 			m.cursor = 0
 		}
@@ -139,7 +138,7 @@ func NewListModel(maxWidth int) ListModel {
 	return ListModel{
 		position:   0,
 		cursor:     0,
-		viewHeight: 5,
+		viewHeight: 10,
 		tail:       1,
 		head:       0,
 		maxWidth:   int(float64(maxWidth) * 0.5),
