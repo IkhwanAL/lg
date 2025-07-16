@@ -3,7 +3,6 @@ package models
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/ikhwanal/everywhere_anywhere/src/core"
 )
 
 var divStyle = lipgloss.NewStyle().
@@ -23,15 +22,7 @@ func (m Div) Init() tea.Cmd {
 func (m Div) Update(msg tea.Msg) (Div, tea.Cmd) {
 	var cmd tea.Cmd
 
-	switch msg := msg.(type) {
-	case core.SearchTypeChangedMsg:
-		m.model, cmd = m.model.Update(msg)
-	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyUp, tea.KeyDown:
-			m.model, cmd = m.model.Update(msg)
-		}
-	}
+	m.model, cmd = m.model.Update(msg)
 	return m, cmd
 }
 
@@ -43,6 +34,6 @@ func NewDiv(maxWidth, maxHeight int) Div {
 	return Div{
 		model:  NewListModel(maxWidth),
 		width:  int(float64(maxWidth) * 0.5),
-		height: int(float64(maxHeight) * 0.75),
+		height: int(float64(maxHeight) * 0.7),
 	}
 }

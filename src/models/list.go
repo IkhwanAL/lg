@@ -64,14 +64,12 @@ func (m ListModel) View() string {
 
 func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	switch msg := msg.(type) {
-	case core.SearchTypeChangedMsg:
-		newList, err := core.SearchFileV3(msg.SearchType)
-		log.Printf("Error Search File: %v", err)
-
-		m.list = newList
+	case core.SearchResultMsg:
+		log.Print("Gotcha")
+		m.list = msg.Result
 
 		// TODO Need A Test File For Sliding Window Tail And Head Position
-		// log.Printf("Search: Tail %d - Head %d = %d > List %d = %v", m.tail-1, m.head, (m.tail-1)-m.head, len(m.list), m.tail-m.head > len(m.list))
+		// log.Printf("Start Search: Tail %d - Head %d = %d > List %d = %v", m.tail-1, m.head, (m.tail-1)-m.head, len(m.list), m.tail-m.head > len(m.list))
 
 		// Look At This Beauty
 		// **Chef French Kiss**
@@ -82,13 +80,12 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 			m.cursor = m.position
 		} else {
 			m.head = 0
-			m.tail = m.viewHeight
+			m.tail = min(len(m.list), m.viewHeight)
 			m.position = 0
 			m.cursor = 0
 		}
 
-		// log.Printf("Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
-
+		// log.Printf("List Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyUp:
@@ -129,7 +126,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		m.tail -= 1
 	}
 
-	// log.Printf("Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
+	log.Printf("Move Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 
 	return m, nil
 }

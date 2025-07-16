@@ -1,5 +1,9 @@
 package core
 
 type SearchTypeChangedMsg struct {
-	SearchType string
+	Search string
+}
+
+type SearchResultMsg struct {
+	Result []string
 }

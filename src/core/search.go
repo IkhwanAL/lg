@@ -143,7 +143,7 @@ func SearchFileV2(key string) ([]string, error) {
 }
 
 // 0.5s or < 1s
-func SearchFileV3(key string) ([]string, error) {
+func SearchFileV3(path string, key string) ([]string, error) {
 	if key == "" {
 		return nil, errors.New("key is empty")
 	}
@@ -153,7 +153,7 @@ func SearchFileV3(key string) ([]string, error) {
 	ch := make(chan string, 5)
 
 	wg.Add(1)
-	go search("D:/", key, ch, &wg)
+	go search(path, key, ch, &wg)
 
 	go func() {
 		wg.Wait()

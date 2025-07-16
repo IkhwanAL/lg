@@ -32,38 +32,24 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-	case core.SearchTypeChangedMsg:
-		// log.Printf("Main %s and %s", msg.SearchType, m.searchModel.TextInput.Value())
-		if msg.SearchType == m.searchModel.TextInput.Value() {
-			m.divListModel, cmd = m.divListModel.Update(msg)
-			if cmd != nil {
-				cmds = append(cmds, cmd)
-			}
-		}
 	case tea.KeyMsg:
 		switch msg.Type {
-		case tea.KeyCtrlC, tea.KeyEsc:
+		case tea.KeyCtrlC:
 			return m, tea.Quit
-		case tea.KeyRunes, tea.KeyBackspace:
-			m.searchModel, cmd = m.searchModel.Update(msg)
-
-			if cmd != nil {
-				cmds = append(cmds, cmd)
-			}
-		case tea.KeyDown, tea.KeyUp:
-			m.divListModel, cmd = m.divListModel.Update(msg)
-
-			if cmd != nil {
-				cmds = append(cmds, cmd)
-			}
 		}
 	}
+
+	m.searchModel, cmd = m.searchModel.Update(msg)
+	cmds = append(cmds, cmd)
+
+	m.divListModel, cmd = m.divListModel.Update(msg)
+	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
 }
 
 func (m RootModel) View() string {
-	return lipgloss.JoinVertical(lipgloss.Top, m.searchModel.View(), m.divListModel.View())
+	return lipgloss.JoinVertical(0, m.searchModel.View(), m.divListModel.View())
 }
 
 func getTerminalSize() (int, int, error) {
@@ -122,7 +108,7 @@ func benchmarkTest() {
 
 	fmt.Println("Very Optimized search...")
 	start = time.Now()
-	results, _ = core.SearchFileV3(key)
+	results, _ = core.SearchFileV3("D:/", key)
 	fmt.Printf("Very Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
 
 	return
@@ -145,8 +131,14 @@ func main() {
 		log.Fatalf("oops something wrong, please contact our support (sales) team: %s", err)
 	}
 
+	dir, err := os.Getwd()
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	root := RootModel{
-		searchModel:  models.NewSearchModel(width),
+		searchModel:  models.NewSearchModel(width, dir+"/"),
 		divListModel: models.NewDiv(width, height),
 	}
 
