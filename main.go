@@ -21,6 +21,7 @@ import (
 type RootModel struct {
 	searchModel  models.SearchModel
 	divListModel models.Div
+	searchPath   string
 }
 
 func (m RootModel) Init() tea.Cmd {
@@ -39,6 +40,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	m.searchModel.Path = m.searchPath
 	m.searchModel, cmd = m.searchModel.Update(msg)
 	cmds = append(cmds, cmd)
 
@@ -138,8 +140,10 @@ func main() {
 	}
 
 	root := RootModel{
-		searchModel:  models.NewSearchModel(width, dir+"/"),
+		searchModel:  models.NewSearchModel(width),
 		divListModel: models.NewDiv(width, height),
+		searchPath:   dir + "/",
+		// searchPath: "D:/",
 	}
 
 	p := tea.NewProgram(root, tea.WithAltScreen())

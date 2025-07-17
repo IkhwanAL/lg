@@ -65,7 +65,6 @@ func (m ListModel) View() string {
 func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case core.SearchResultMsg:
-		log.Print("Gotcha")
 		m.list = msg.Result
 
 		// TODO Need A Test File For Sliding Window Tail And Head Position
@@ -98,19 +97,24 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 			}
 
 			if m.position > 0 {
-				m.position -= 1
+				m.position--
 			}
 		case tea.KeyDown:
 			if m.list == nil {
 				return m, nil
 			}
 
-			if m.cursor < m.viewHeight-1 {
+			// Max 10
+			// What if less than 10
+
+			maxCursorView := min(len(m.list), m.viewHeight)
+
+			if m.cursor < maxCursorView-1 {
 				m.cursor++
 			}
 
 			if m.position < len(m.list)-1 {
-				m.position += 1
+				m.position++
 			}
 		}
 	}

@@ -27,7 +27,7 @@ func (m Div) Update(msg tea.Msg) (Div, tea.Cmd) {
 }
 
 func (m Div) View() string {
-	return divStyle.Width(m.width).Height(m.height).Render(m.model.View())
+	return m.model.View()
 }
 
 func NewDiv(maxWidth, maxHeight int) Div {

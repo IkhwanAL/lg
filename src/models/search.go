@@ -10,13 +10,11 @@ import (
 	"github.com/ikhwanal/everywhere_anywhere/src/core"
 )
 
-var boxStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("63"))
+var boxStyle = lipgloss.NewStyle().PaddingBottom(1)
 
 type SearchModel struct {
 	TextInput     textinput.Model
-	path          string
+	Path          string
 	lastValue     string
 	searchPending bool
 	err           error
@@ -60,7 +58,7 @@ func (m SearchModel) Update(msg tea.Msg) (SearchModel, tea.Cmd) {
 			log.Printf("Done %s", msg.Search)
 			m.searchPending = false
 
-			resultFile, err := core.SearchFileV3(m.path, msg.Search)
+			resultFile, err := core.SearchFileV3(m.Path, msg.Search)
 
 			if err != nil {
 				log.Printf("Cannot Find File %d", err)
@@ -84,7 +82,7 @@ func (m SearchModel) TickSearch(searchParam string) tea.Cmd {
 	})
 }
 
-func NewSearchModel(maxWidth int, prefixPath string) SearchModel {
+func NewSearchModel(maxWidth int) SearchModel {
 	search := textinput.New()
 	search.Placeholder = "Search File..."
 
@@ -93,7 +91,6 @@ func NewSearchModel(maxWidth int, prefixPath string) SearchModel {
 	search.Focus()
 
 	return SearchModel{
-		path:          prefixPath,
 		searchPending: false,
 		TextInput:     search,
 		err:           nil,

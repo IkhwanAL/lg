@@ -150,7 +150,7 @@ func SearchFileV3(path string, key string) ([]string, error) {
 
 	var wg sync.WaitGroup
 
-	ch := make(chan string, 5)
+	ch := make(chan string)
 
 	wg.Add(1)
 	go search(path, key, ch, &wg)
