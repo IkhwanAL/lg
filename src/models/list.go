@@ -10,6 +10,7 @@ package models
 
 import (
 	"log"
+	"os"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -27,6 +28,7 @@ var normalStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("15"))
 
 type ListModel struct {
+	Path       string
 	position   int
 	cursor     int
 	maxWidth   int
@@ -62,11 +64,36 @@ func (m ListModel) View() string {
 	return strings.Join(itemLists, "\n")
 }
 
+func (m ListModel) DefaultList() []string {
+	dir, err := os.ReadDir(m.Path)
+
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+
+	var list []string
+
+	for _, v := range dir {
+		if v.IsDir() {
+			list = append(m.list, m.Path+"/", v.Name(), "/")
+			continue
+		}
+
+		list = append(m.list, m.Path+"/", v.Name())
+	}
+
+	return list
+}
+
 func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case core.SearchResultMsg:
-		m.list = msg.Result
-
+		if msg.Result == nil {
+			m.list = m.DefaultList()
+		} else {
+			m.list = msg.Result
+		}
 		// TODO Need A Test File For Sliding Window Tail And Head Position
 		// log.Printf("Start Search: Tail %d - Head %d = %d > List %d = %v", m.tail-1, m.head, (m.tail-1)-m.head, len(m.list), m.tail-m.head > len(m.list))
 
@@ -130,7 +157,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		m.tail -= 1
 	}
 
-	log.Printf("Move Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
+	// log.Printf("Move Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 
 	return m, nil
 }

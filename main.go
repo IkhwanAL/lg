@@ -19,9 +19,9 @@ import (
 )
 
 type RootModel struct {
-	searchModel  models.SearchModel
-	divListModel models.Div
-	searchPath   string
+	searchModel models.SearchModel
+	listModel   models.ListModel
+	searchPath  string
 }
 
 func (m RootModel) Init() tea.Cmd {
@@ -44,14 +44,15 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.searchModel, cmd = m.searchModel.Update(msg)
 	cmds = append(cmds, cmd)
 
-	m.divListModel, cmd = m.divListModel.Update(msg)
+	m.listModel.Path = m.searchPath
+	m.listModel, cmd = m.listModel.Update(msg)
 	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
 }
 
 func (m RootModel) View() string {
-	return lipgloss.JoinVertical(0, m.searchModel.View(), m.divListModel.View())
+	return lipgloss.JoinVertical(0, m.searchModel.View(), m.listModel.View())
 }
 
 func getTerminalSize() (int, int, error) {
@@ -128,7 +129,7 @@ func main() {
 
 	defer f.Close()
 
-	width, height, err := getTerminalSize()
+	width, _, err := getTerminalSize()
 	if err != nil {
 		log.Fatalf("oops something wrong, please contact our support (sales) team: %s", err)
 	}
@@ -140,9 +141,9 @@ func main() {
 	}
 
 	root := RootModel{
-		searchModel:  models.NewSearchModel(width),
-		divListModel: models.NewDiv(width, height),
-		searchPath:   dir + "/",
+		searchModel: models.NewSearchModel(width),
+		listModel:   models.NewListModel(width),
+		searchPath:  dir + "/",
 		// searchPath: "D:/",
 	}
 
