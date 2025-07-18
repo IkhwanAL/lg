@@ -64,8 +64,8 @@ func (m ListModel) View() string {
 	return strings.Join(itemLists, "\n")
 }
 
-func (m ListModel) DefaultList() []string {
-	dir, err := os.ReadDir(m.Path)
+func defaultList(path string) []string {
+	dir, err := os.ReadDir(path)
 
 	if err != nil {
 		log.Print(err)
@@ -76,40 +76,28 @@ func (m ListModel) DefaultList() []string {
 
 	for _, v := range dir {
 		if v.IsDir() {
-			list = append(m.list, m.Path+"/", v.Name(), "/")
+			list = append(list, v.Name(), "/")
 			continue
 		}
 
-		list = append(m.list, m.Path+"/", v.Name())
+		list = append(list, v.Name())
 	}
-
+	// log.Print(list)
 	return list
 }
 
 func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case core.SearchResultMsg:
-		if msg.Result == nil {
-			m.list = m.DefaultList()
-		} else {
-			m.list = msg.Result
-		}
+		m.list = msg.Result
+
 		// TODO Need A Test File For Sliding Window Tail And Head Position
 		// log.Printf("Start Search: Tail %d - Head %d = %d > List %d = %v", m.tail-1, m.head, (m.tail-1)-m.head, len(m.list), m.tail-m.head > len(m.list))
 
-		// Look At This Beauty
-		// **Chef French Kiss**
-		if (m.tail-1)-m.head > len(m.list) {
-			m.head = (len(m.list) % m.viewHeight) - 1
-			m.tail = len(m.list)
-			m.position = m.tail - 1
-			m.cursor = m.position
-		} else {
-			m.head = 0
-			m.tail = min(len(m.list), m.viewHeight)
-			m.position = 0
-			m.cursor = 0
-		}
+		m.head = 0
+		m.tail = min(len(m.list), m.viewHeight)
+		m.position = 0
+		m.cursor = 0
 
 		// log.Printf("List Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 	case tea.KeyMsg:
@@ -130,9 +118,6 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 			if m.list == nil {
 				return m, nil
 			}
-
-			// Max 10
-			// What if less than 10
 
 			maxCursorView := min(len(m.list), m.viewHeight)
 
@@ -162,13 +147,16 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	return m, nil
 }
 
-func NewListModel(maxWidth int) ListModel {
+func NewListModel(maxWidth int, path string) ListModel {
+	list := defaultList(path)
+
 	return ListModel{
+		list:       list,
 		position:   0,
 		cursor:     0,
 		viewHeight: 10,
-		tail:       1,
+		tail:       len(list) - 1,
 		head:       0,
-		maxWidth:   int(float64(maxWidth) * 0.5),
+		maxWidth:   int(float64(maxWidth) * 0.8),
 	}
 }
