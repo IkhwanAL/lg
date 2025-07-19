@@ -60,7 +60,7 @@ func TestListPositionHeadTail(t *testing.T) {
 
 	assert.Condition(t, func() (success bool) {
 		return (list.tail-list.head)-1 < viewHeight
-	}, "After Press Key Down, The Two Pointer Not Meet Condition Of View Height Argument")
+	}, "After Press Key Down, The Length of Two Pointer is too big for View Height Argument")
 
 	list.position -= 1
 	position -= 1
@@ -79,6 +79,6 @@ func TestListPositionHeadTail(t *testing.T) {
 
 	assert.Condition(t, func() (success bool) {
 		return (list.tail-list.head)-1 < viewHeight
-	}, "After Press Key Up, The Two Pointer Not Meet Condition Of View Height Argument")
+	}, "After Press Key Up, The Length of Two Pointer is too big for View Height Argument")
 
 }
