@@ -1,34 +1,31 @@
 package models
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/ikhwanal/everywhere_anywhere/src/core"
 	"github.com/stretchr/testify/assert"
 )
 
-var TEST_FILE = []string{
-	"FILE 1",
-	"FILE 2",
-	"FILE 3",
-	"FILE 4",
-	"FILE 5",
-	"FILE 6",
-	"FILE 7",
-	"FILE 8",
-	"FILE 9",
-	"FILE 10",
-	"FILE 11",
-	"FILE 12",
-	"FILE 13",
-	"FILE 14",
-	"FILE 15",
-	"FILE 16",
-	"FILE 17",
-	"FILE 18",
-	"FILE 19",
+func generateTestFile() []core.FsEntry {
+	list := make([]core.FsEntry, 15)
+
+	for i := range 15 {
+		list = append(list, core.FsEntry{
+			Name: fmt.Sprintf("File %d", i),
+			Type: core.File,
+			Path: "./",
+		})
+	}
+
+	return list
 }
 
 func TestListPositionHeadTail(t *testing.T) {
+
+	TEST_FILE := generateTestFile()
+
 	tail := len(TEST_FILE) - 1
 	position := 0
 	viewHeight := 10

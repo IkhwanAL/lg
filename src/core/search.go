@@ -10,14 +10,6 @@ import (
 	"sync"
 )
 
-var SKIP_KNOWN_DIRECTIRIES = []string{
-	"node_modules",
-	".git",
-	"Recovery",
-	"System Volume Information",
-	"$RECYCLE.BIN",
-}
-
 // #define MAX_FILE 10
 var MAX_FILE = 1000
 
@@ -143,14 +135,14 @@ func SearchFileV2(key string) ([]string, error) {
 }
 
 // 0.5s or < 1s
-func SearchFileV3(path string, key string) ([]string, error) {
+func SearchFileV3(path string, key string) ([]FsEntry, error) {
 	if key == "" {
 		return nil, errors.New("key is empty")
 	}
 
 	var wg sync.WaitGroup
 
-	ch := make(chan string)
+	ch := make(chan FsEntry)
 
 	wg.Add(1)
 	go search(path, key, ch, &wg)
@@ -160,7 +152,7 @@ func SearchFileV3(path string, key string) ([]string, error) {
 		close(ch)
 	}()
 
-	var result []string
+	var result []FsEntry
 
 	for path := range ch {
 		result = append(result, path)
@@ -169,7 +161,7 @@ func SearchFileV3(path string, key string) ([]string, error) {
 	return result, nil
 }
 
-func search(rootDir string, fileToSearch string, result chan<- string, wg *sync.WaitGroup) {
+func search(rootDir string, fileToSearch string, result chan<- FsEntry, wg *sync.WaitGroup) {
 	defer wg.Done()
 	dir, err := os.ReadDir(rootDir)
 
@@ -190,6 +182,10 @@ func search(rootDir string, fileToSearch string, result chan<- string, wg *sync.
 			continue
 		}
 
-		result <- rootDir + d.Name()
+		result <- FsEntry{
+			Name: rootDir + d.Name(),
+			Type: File,
+			Path: rootDir + d.Name(),
+		}
 	}
 }

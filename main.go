@@ -32,7 +32,11 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
+	searchPath := m.searchPath
+
 	switch msg := msg.(type) {
+	case core.PathMsg:
+		searchPath = msg.Path
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlC:
@@ -40,11 +44,11 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	m.searchModel.Path = m.searchPath
+	m.searchModel.Path = searchPath
 	m.searchModel, cmd = m.searchModel.Update(msg)
 	cmds = append(cmds, cmd)
 
-	m.listModel.Path = m.searchPath
+	m.listModel.Path = searchPath
 	m.listModel, cmd = m.listModel.Update(msg)
 	cmds = append(cmds, cmd)
 
@@ -111,8 +115,8 @@ func benchmarkTest() {
 
 	fmt.Println("Very Optimized search...")
 	start = time.Now()
-	results, _ = core.SearchFileV3("D:/", key)
-	fmt.Printf("Very Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(results))
+	fsResults, _ := core.SearchFileV3("D:/", key)
+	fmt.Printf("Very Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(fsResults))
 
 	return
 }
@@ -142,7 +146,7 @@ func main() {
 
 	root := RootModel{
 		searchModel: models.NewSearchModel(width),
-		listModel:   models.NewListModel(width),
+		listModel:   models.NewListModel(width, dir+"/"),
 		searchPath:  dir + "/",
 		// searchPath: "D:/",
 	}

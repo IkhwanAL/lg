@@ -5,5 +5,9 @@ type SearchTypeChangedMsg struct {
 }
 
 type SearchResultMsg struct {
-	Result []string
+	Result []FsEntry
+}
+
+type PathMsg struct {
+	Path string
 }

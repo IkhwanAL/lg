@@ -35,7 +35,7 @@ type ListModel struct {
 	viewHeight int
 	tail       int
 	head       int
-	list       []string
+	list       []core.FsEntry
 }
 
 func (m ListModel) Init() tea.Cmd {
@@ -56,15 +56,15 @@ func (m ListModel) View() string {
 		itemIndex := i - m.head
 
 		if m.cursor == itemIndex {
-			itemLists[itemIndex] = selectedStyle.Width(m.maxWidth).Render(value + ";")
+			itemLists[itemIndex] = selectedStyle.Width(m.maxWidth).Render(value.Name + ";")
 		} else {
-			itemLists[itemIndex] = normalStyle.Width(m.maxWidth).Render(value + ";")
+			itemLists[itemIndex] = normalStyle.Width(m.maxWidth).Render(value.Name + ";")
 		}
 	}
 	return strings.Join(itemLists, "\n")
 }
 
-func defaultList(path string) []string {
+func defaultList(path string) []core.FsEntry {
 	dir, err := os.ReadDir(path)
 
 	if err != nil {
@@ -72,15 +72,23 @@ func defaultList(path string) []string {
 		return nil
 	}
 
-	var list []string
+	var list []core.FsEntry
 
 	for _, v := range dir {
 		if v.IsDir() {
-			list = append(list, v.Name(), "/")
+			list = append(list, core.FsEntry{
+				Name: v.Name() + "/",
+				Path: path + "/" + v.Name() + "/",
+				Type: core.Dir,
+			})
 			continue
 		}
 
-		list = append(list, v.Name())
+		list = append(list, core.FsEntry{
+			Name: v.Name(),
+			Path: path + "/" + v.Name(),
+			Type: core.File,
+		})
 	}
 	// log.Print(list)
 	return list
@@ -142,9 +150,8 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		}
 	}
 
-	// Head tail calculation
 	m.Move()
-	// log.Printf("Move Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
+	log.Printf("Move Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 
 	return m, nil
 }
@@ -172,7 +179,7 @@ func NewListModel(maxWidth int, path string) ListModel {
 		position:   0,
 		cursor:     0,
 		viewHeight: maxHeight,
-		tail:       min(maxHeight, len(list)-1),
+		tail:       min(maxHeight, len(list)),
 		head:       0,
 		maxWidth:   int(float64(maxWidth) * 0.8),
 	}
