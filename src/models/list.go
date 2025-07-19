@@ -9,8 +9,12 @@ and i dont want that)
 package models
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -42,11 +46,28 @@ func (m ListModel) Init() tea.Cmd {
 	return nil
 }
 
+func (m ListModel) OpenFile(path string) error {
+	var cmd *exec.Cmd
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", path)
+	case "darwin":
+		cmd = exec.Command("open", path)
+	case "linux":
+		cmd = exec.Command("xdg-open", path)
+	default:
+		return fmt.Errorf("unsupported platform")
+	}
+
+	return cmd.Start()
+}
+
 func (m ListModel) View() string {
 	itemLists := make([]string, m.viewHeight)
 
 	if m.list == nil {
-		return normalStyle.Width(m.maxWidth).Render("-- File Not Found --")
+		return normalStyle.Width(m.maxWidth).Render("🔍 No files matched your search.")
 	}
 
 	for i := m.head; i < m.tail; i++ {
@@ -55,10 +76,16 @@ func (m ListModel) View() string {
 		// Part of Head Tail Calculation
 		itemIndex := i - m.head
 
+		aciiFsType := "[DIR] "
+
+		if value.Type == core.File {
+			aciiFsType = "[FILE] "
+		}
+
 		if m.cursor == itemIndex {
-			itemLists[itemIndex] = selectedStyle.Width(m.maxWidth).Render(value.Name + ";")
+			itemLists[itemIndex] = selectedStyle.Width(m.maxWidth).Render(">" + aciiFsType + value.Name + ";")
 		} else {
-			itemLists[itemIndex] = normalStyle.Width(m.maxWidth).Render(value.Name + ";")
+			itemLists[itemIndex] = normalStyle.Width(m.maxWidth).Render(aciiFsType + value.Name + ";")
 		}
 	}
 	return strings.Join(itemLists, "\n")
@@ -76,9 +103,10 @@ func defaultList(path string) []core.FsEntry {
 
 	for _, v := range dir {
 		if v.IsDir() {
+
 			list = append(list, core.FsEntry{
 				Name: v.Name() + "/",
-				Path: path + "/" + v.Name() + "/",
+				Path: filepath.FromSlash(path + v.Name() + "/"),
 				Type: core.Dir,
 			})
 			continue
@@ -86,16 +114,22 @@ func defaultList(path string) []core.FsEntry {
 
 		list = append(list, core.FsEntry{
 			Name: v.Name(),
-			Path: path + "/" + v.Name(),
+			Path: filepath.ToSlash(path + "/" + v.Name()),
 			Type: core.File,
 		})
 	}
-	// log.Print(list)
 	return list
 }
 
 func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	switch msg := msg.(type) {
+	case core.PathMsg:
+		m.list = defaultList(m.Path)
+
+		m.head = 0
+		m.tail = min(len(m.list), m.viewHeight)
+		m.position = 0
+		m.cursor = 0
 	case core.SearchResultMsg:
 		m.list = msg.Result
 
@@ -109,16 +143,27 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		// log.Printf("List Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 	case tea.KeyMsg:
 		switch msg.Type {
+		case tea.KeyCtrlB:
+			reversePath := filepath.Join(m.Path, "..")
+
+			return m, tea.Cmd(func() tea.Msg {
+				return core.PathMsg{Path: reversePath}
+			})
 		case tea.KeyEnter:
-			// selectedPath := m.Path
+			selectedPath := m.list[m.position]
 
-			// return m, tea.Cmd(func() tea.Msg {
-			// 	return core.PathMsg{Path: selectedPath}
-			// })
-
-			// #TODO
-			// If User Enter File Open File
 			// If User Enter Dir Open Dir
+			if selectedPath.Type == core.Dir {
+				return m, tea.Cmd(func() tea.Msg {
+					return core.PathMsg{Path: selectedPath.Path}
+				})
+			}
+
+			err := m.OpenFile(selectedPath.Path)
+
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			return m, nil
 		case tea.KeyUp:
@@ -151,7 +196,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	}
 
 	m.Move()
-	log.Printf("Move Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
+	// log.Printf("Move Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 
 	return m, nil
 }

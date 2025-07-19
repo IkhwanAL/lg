@@ -173,7 +173,7 @@ func search(rootDir string, fileToSearch string, result chan<- FsEntry, wg *sync
 	for _, d := range dir {
 		if d.IsDir() {
 			wg.Add(1)
-			go search(rootDir+d.Name()+"/", fileToSearch, result, wg)
+			go search(filepath.FromSlash(rootDir+d.Name()+"/"), fileToSearch, result, wg)
 
 			continue
 		}
@@ -185,7 +185,7 @@ func search(rootDir string, fileToSearch string, result chan<- FsEntry, wg *sync
 		result <- FsEntry{
 			Name: rootDir + d.Name(),
 			Type: File,
-			Path: rootDir + d.Name(),
+			Path: filepath.ToSlash(rootDir + d.Name()),
 		}
 	}
 }

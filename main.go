@@ -37,6 +37,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case core.PathMsg:
 		searchPath = msg.Path
+		m.searchPath = searchPath
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlC:
@@ -49,6 +50,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	m.listModel.Path = searchPath
+	// log.Print(searchPath)
 	m.listModel, cmd = m.listModel.Update(msg)
 	cmds = append(cmds, cmd)
 
