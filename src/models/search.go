@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -36,34 +35,27 @@ func (m SearchModel) Update(msg tea.Msg) (SearchModel, tea.Cmd) {
 		m.TextInput, cmd = m.TextInput.Update(msg)
 
 		currentValue := m.TextInput.Value()
+
 		if m.lastValue != currentValue {
 			m.lastValue = currentValue
 
-			if currentValue != "" {
-				m.searchPending = true
+			m.searchPending = true
 
-				debounceSearch := tea.Tick(500*time.Millisecond, func(t time.Time) tea.Msg {
-					return core.SearchTypeChangedMsg{Search: currentValue}
-				})
+			debounceSearch := tea.Tick(500*time.Millisecond, func(t time.Time) tea.Msg {
+				return core.SearchTypeChangedMsg{Search: currentValue}
+			})
 
-				return m, tea.Batch(cmd, debounceSearch)
-			} else {
-				m.searchPending = false
-			}
+			return m, tea.Batch(cmd, debounceSearch)
+		} else {
+			m.searchPending = false
 		}
 
 		return m, cmd
 	case core.SearchTypeChangedMsg:
 		if m.searchPending && msg.Search == m.lastValue {
-			log.Printf("Done %s", msg.Search)
 			m.searchPending = false
 
-			resultFile, err := core.SearchFileV3(m.Path, msg.Search)
-
-			if err != nil {
-				log.Printf("Cannot Find File %d", err)
-				return m, cmd
-			}
+			resultFile, _ := core.SearchFileV3(m.Path, msg.Search)
 
 			return m, tea.Cmd(func() tea.Msg {
 				return core.SearchResultMsg{Result: resultFile}

@@ -131,7 +131,11 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		m.position = 0
 		m.cursor = 0
 	case core.SearchResultMsg:
-		m.list = msg.Result
+		if msg.Result == nil {
+			m.list = defaultList(m.Path)
+		} else {
+			m.list = msg.Result
+		}
 
 		// log.Printf("Start Search: Tail %d - Head %d = %d > List %d = %v", m.tail-1, m.head, (m.tail-1)-m.head, len(m.list), m.tail-m.head > len(m.list))
 
