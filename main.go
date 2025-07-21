@@ -21,6 +21,7 @@ import (
 type RootModel struct {
 	searchModel models.SearchModel
 	listModel   models.ListModel
+	helpModel   models.HelpModel
 	searchPath  string
 }
 
@@ -58,7 +59,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m RootModel) View() string {
-	return lipgloss.JoinVertical(0, m.searchModel.View(), m.listModel.View())
+	return lipgloss.JoinVertical(0, m.searchModel.View(), m.listModel.View(), m.helpModel.View())
 }
 
 func getTerminalSize() (int, int, error) {
@@ -149,8 +150,8 @@ func main() {
 	root := RootModel{
 		searchModel: models.NewSearchModel(width),
 		listModel:   models.NewListModel(width, dir+"/"),
+		helpModel:   models.NewHelpModel(),
 		searchPath:  dir + "/",
-		// searchPath: "D:/",
 	}
 
 	p := tea.NewProgram(root, tea.WithAltScreen())
