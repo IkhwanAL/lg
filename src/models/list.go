@@ -103,10 +103,9 @@ func defaultList(path string) []core.FsEntry {
 
 	for _, v := range dir {
 		if v.IsDir() {
-
 			list = append(list, core.FsEntry{
 				Name: v.Name() + "/",
-				Path: filepath.FromSlash(path + v.Name() + "/"),
+				Path: filepath.FromSlash(path + "/" + v.Name() + "/"),
 				Type: core.Dir,
 			})
 			continue
@@ -149,14 +148,11 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		switch msg.Type {
 		case tea.KeyCtrlB:
 			reversePath := filepath.Join(m.Path, "..")
-
 			return m, tea.Cmd(func() tea.Msg {
 				return core.PathMsg{Path: reversePath}
 			})
 		case tea.KeyEnter:
 			selectedPath := m.list[m.position]
-
-			// If User Enter Dir Open Dir
 			if selectedPath.Type == core.Dir {
 				return m, tea.Cmd(func() tea.Msg {
 					return core.PathMsg{Path: selectedPath.Path}
@@ -205,6 +201,10 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	return m, nil
 }
 
+/*
+A Function That Move Head and Tail Pointer In The List To Achive Scroll in UI
+Because The Head And Tail Pointer Used To Show Item In The List
+*/
 func (m *ListModel) Move() {
 	if m.position > m.tail-1 && m.tail < len(m.list) {
 		m.tail += 1
@@ -215,13 +215,12 @@ func (m *ListModel) Move() {
 		m.head -= 1
 		m.tail -= 1
 	}
-
 }
 
 func NewListModel(maxWidth int, path string) ListModel {
 	list := defaultList(path)
 
-	maxHeight := 10
+	maxHeight := 20
 
 	return ListModel{
 		list:       list,

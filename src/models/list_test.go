@@ -9,9 +9,9 @@ import (
 )
 
 func generateTestFile() []core.FsEntry {
-	list := make([]core.FsEntry, 15)
+	list := make([]core.FsEntry, 24)
 
-	for i := range 15 {
+	for i := range 24 {
 		list = append(list, core.FsEntry{
 			Name: fmt.Sprintf("File %d", i),
 			Type: core.File,
@@ -22,11 +22,14 @@ func generateTestFile() []core.FsEntry {
 	return list
 }
 
+/*
+A Test For Verifying Head Tail Movement
+*/
 func TestListPositionHeadTail(t *testing.T) {
 
 	TEST_FILE := generateTestFile()
 
-	tail := len(TEST_FILE) - 1
+	tail := len(TEST_FILE)
 	position := 0
 	viewHeight := 10
 
@@ -45,7 +48,7 @@ func TestListPositionHeadTail(t *testing.T) {
 
 	assert.Equal(t, position, list.position, "Press Key Down And Position Must Moving In The List")
 
-	for range 10 {
+	for range viewHeight {
 		list.position++
 		position += 1
 	}
@@ -64,7 +67,7 @@ func TestListPositionHeadTail(t *testing.T) {
 
 	assert.Equal(t, position, list.position, "Press Key Up And Position Must Moving In The List")
 
-	for range 10 {
+	for range viewHeight {
 		list.position--
 		position -= 1
 	}
