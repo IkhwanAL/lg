@@ -10,11 +10,11 @@ A Simple File Explorer In Terminal
 
 ### Linux
 
-Just type `GOOS=linux go build -o lg` and add it into Windows System Variable
+Just type `GOOS=linux go build -o lg-file` and add it into Windows System Variable
 
 ### Windows
 
-Just Type `GOOS=windows go build -o lg` and add it into Linux Path
+Just Type `GOOS=windows go build -o lg-file` and add it into Linux Path
 
 `export $PATH:/path/to/file`
 
@@ -23,6 +23,10 @@ Just Type `GOOS=windows go build -o lg` and add it into Linux Path
 You can specifiy Which architecture cpu you use like
 
 `GOARCH=arm` or `GOARCH=amd64`
+
+### Or
+
+Quickest Way to `go install github.com/ikhwanal/lg-file`
 
 ##  Motivation
 
