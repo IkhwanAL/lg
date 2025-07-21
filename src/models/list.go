@@ -146,7 +146,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		// log.Printf("List Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 	case tea.KeyMsg:
 		switch msg.Type {
-		case tea.KeyCtrlB:
+		case tea.KeyCtrlZ:
 			reversePath := filepath.Join(m.Path, "..")
 			return m, tea.Cmd(func() tea.Msg {
 				return core.PathMsg{Path: reversePath}
