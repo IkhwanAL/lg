@@ -8,15 +8,15 @@ A Simple File Explorer In Terminal
 
 ## Built From Scratch Or ??
 
-Under Maintaince
-
 ### Linux
 
-Just type `GOOS=linux go build -o lg`
+Just type `GOOS=linux go build -o lg` and add it into Windows System Variable
 
 ### Windows
 
-Just Type `GOOS=windows go build -o lg`
+Just Type `GOOS=windows go build -o lg` and add it into Linux Path
+
+`export $PATH:/path/to/file`
 
 ### Other
 
