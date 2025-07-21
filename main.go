@@ -19,6 +19,8 @@ import (
 )
 
 type RootModel struct {
+	height      int
+	width       int
 	searchModel models.SearchModel
 	listModel   models.ListModel
 	helpModel   models.HelpModel
@@ -39,6 +41,11 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case core.PathMsg:
 		searchPath = msg.Path
 		m.searchPath = searchPath
+	case tea.WindowSizeMsg:
+		log.Printf("Resize W %d, H %d", msg.Width, msg.Height)
+		m.searchModel.Width = msg.Width
+		m.listModel.Height = msg.Height - 4
+		m.listModel.Width = msg.Width
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlC:
@@ -51,7 +58,6 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmds = append(cmds, cmd)
 
 	m.listModel.Path = searchPath
-	// log.Print(searchPath)
 	m.listModel, cmd = m.listModel.Update(msg)
 	cmds = append(cmds, cmd)
 
@@ -136,11 +142,12 @@ func main() {
 
 	defer f.Close()
 
-	width, _, err := getTerminalSize()
+	width, height, err := getTerminalSize()
 	if err != nil {
 		log.Fatalf("oops something wrong, please contact our support (sales) team: %s", err)
 	}
 
+	// log.Printf("Main W %d, H %d", width, height)
 	dir, err := os.Getwd()
 
 	if err != nil {
@@ -149,7 +156,7 @@ func main() {
 
 	root := RootModel{
 		searchModel: models.NewSearchModel(width),
-		listModel:   models.NewListModel(width, dir+"/"),
+		listModel:   models.NewListModel(width, height-4, dir+"/"),
 		helpModel:   models.NewHelpModel(),
 		searchPath:  dir + "/",
 	}

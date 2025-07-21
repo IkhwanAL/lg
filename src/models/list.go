@@ -32,14 +32,14 @@ var normalStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("15"))
 
 type ListModel struct {
-	Path       string
-	position   int
-	cursor     int
-	maxWidth   int
-	viewHeight int
-	tail       int
-	head       int
-	list       []core.FsEntry
+	Path     string
+	position int
+	cursor   int
+	Height   int
+	Width    int
+	tail     int
+	head     int
+	list     []core.FsEntry
 }
 
 func (m ListModel) Init() tea.Cmd {
@@ -64,10 +64,10 @@ func (m ListModel) OpenFile(path string) error {
 }
 
 func (m ListModel) View() string {
-	itemLists := make([]string, m.viewHeight)
+	itemLists := make([]string, m.Height)
 
 	if m.list == nil {
-		return normalStyle.Width(m.maxWidth).Render("🔍 No files matched your search.")
+		return normalStyle.Width(m.Width).Render("🔍 No files matched your search.")
 	}
 
 	for i := m.head; i < m.tail; i++ {
@@ -83,9 +83,9 @@ func (m ListModel) View() string {
 		}
 
 		if m.cursor == itemIndex {
-			itemLists[itemIndex] = selectedStyle.Width(m.maxWidth).Render(">" + aciiFsType + value.Name + ";")
+			itemLists[itemIndex] = selectedStyle.Width(m.Width).Render(">" + aciiFsType + value.Name + ";")
 		} else {
-			itemLists[itemIndex] = normalStyle.Width(m.maxWidth).Render(aciiFsType + value.Name + ";")
+			itemLists[itemIndex] = normalStyle.Width(m.Width).Render(aciiFsType + value.Name + ";")
 		}
 	}
 	return strings.Join(itemLists, "\n")
@@ -126,7 +126,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		m.list = defaultList(m.Path)
 
 		m.head = 0
-		m.tail = min(len(m.list), m.viewHeight)
+		m.tail = min(len(m.list), m.Height)
 		m.position = 0
 		m.cursor = 0
 	case core.SearchResultMsg:
@@ -139,7 +139,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		// log.Printf("Start Search: Tail %d - Head %d = %d > List %d = %v", m.tail-1, m.head, (m.tail-1)-m.head, len(m.list), m.tail-m.head > len(m.list))
 
 		m.head = 0
-		m.tail = min(len(m.list), m.viewHeight)
+		m.tail = min(len(m.list), m.Height)
 		m.position = 0
 		m.cursor = 0
 
@@ -183,7 +183,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 				return m, nil
 			}
 
-			maxCursorView := min(len(m.list), m.viewHeight)
+			maxCursorView := min(len(m.list), m.Height)
 
 			if m.cursor < maxCursorView-1 {
 				m.cursor++
@@ -217,18 +217,18 @@ func (m *ListModel) Move() {
 	}
 }
 
-func NewListModel(maxWidth int, path string) ListModel {
+func NewListModel(maxWidth int, height int, path string) ListModel {
 	list := defaultList(path)
 
-	maxHeight := 20
+	maxHeight := min(20, height)
 
 	return ListModel{
-		list:       list,
-		position:   0,
-		cursor:     0,
-		viewHeight: maxHeight,
-		tail:       min(maxHeight, len(list)),
-		head:       0,
-		maxWidth:   int(float64(maxWidth) * 0.8),
+		list:     list,
+		position: 0,
+		cursor:   0,
+		Height:   maxHeight,
+		tail:     min(maxHeight, len(list)),
+		head:     0,
+		Width:    maxWidth,
 	}
 }

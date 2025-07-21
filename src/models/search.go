@@ -17,6 +17,7 @@ type SearchModel struct {
 	lastValue     string
 	searchPending bool
 	err           error
+	Width         int
 }
 
 func (m SearchModel) Init() tea.Cmd {
@@ -24,6 +25,7 @@ func (m SearchModel) Init() tea.Cmd {
 }
 
 func (m SearchModel) View() string {
+	m.TextInput.Width = m.Width
 	return boxStyle.Render(m.TextInput.View())
 }
 
@@ -78,7 +80,7 @@ func NewSearchModel(maxWidth int) SearchModel {
 	search := textinput.New()
 	search.Placeholder = "Search File..."
 
-	search.Width = int(float64(maxWidth) * 0.48)
+	search.Width = maxWidth
 
 	search.Focus()
 
@@ -86,5 +88,6 @@ func NewSearchModel(maxWidth int) SearchModel {
 		searchPending: false,
 		TextInput:     search,
 		err:           nil,
+		Width:         maxWidth,
 	}
 }

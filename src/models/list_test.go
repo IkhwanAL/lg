@@ -34,12 +34,12 @@ func TestListPositionHeadTail(t *testing.T) {
 	viewHeight := 10
 
 	list := ListModel{
-		position:   position,
-		list:       TEST_FILE,
-		viewHeight: viewHeight,
-		tail:       min(viewHeight, tail),
-		cursor:     0,
-		head:       0,
+		position: position,
+		list:     TEST_FILE,
+		Height:   viewHeight,
+		tail:     min(viewHeight, tail),
+		cursor:   0,
+		head:     0,
 	}
 
 	list.position++
