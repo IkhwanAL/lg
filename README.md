@@ -1,12 +1,34 @@
 # What this Project About
 
-An File Explorer In Terminal 
+A Simple File Explorer In Terminal 
 
-#  Motivation
+## Example
+
+![Screenshot](./doc/ss-1.png)
+
+## Built From Scratch Or ??
+
+Under Maintaince
+
+### Linux
+
+Just type `GOOS=linux go build -o lg`
+
+### Windows
+
+Just Type `GOOS=windows go build -o lg`
+
+### Other
+
+You can specifiy Which architecture cpu you use like
+
+`GOARCH=arm` or `GOARCH=amd64`
+
+##  Motivation
 
 the plan is use terminal to the max usage possible, like can i use everything in terminal. so that's the this idea came from a simple file explorer to look up file and directory in the current directory location and of course some basic utility like find file and open file.
 
-# Future Me Todo
+## Future Me Todo
 
 - Add Preview if its text related file (but it became beyond simple file explorer, but need to think about it)
 - Add Filter (like filter extension file)
