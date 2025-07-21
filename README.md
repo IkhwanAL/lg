@@ -26,7 +26,7 @@ You can specifiy Which architecture cpu you use like
 
 ### Or
 
-Quickest Way to `go install github.com/ikhwanal/lg-file`
+Quickest Way is by `go install github.com/ikhwanal/lg-file` and it will go to your go PATH bin
 
 ##  Motivation
 
