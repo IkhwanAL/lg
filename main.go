@@ -13,8 +13,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/ikhwanal/everywhere_anywhere/src/core"
-	"github.com/ikhwanal/everywhere_anywhere/src/models"
+	"github.com/ikhwanal/lg-file/src/core"
+	"github.com/ikhwanal/lg-file/src/models"
 	"golang.org/x/term"
 )
 

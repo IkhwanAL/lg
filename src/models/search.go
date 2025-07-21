@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/ikhwanal/everywhere_anywhere/src/core"
+	"github.com/ikhwanal/lg-file/src/core"
 )
 
 var boxStyle = lipgloss.NewStyle().PaddingBottom(1)

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ikhwanal/everywhere_anywhere/src/core"
+	"github.com/ikhwanal/lg-file/src/core"
 	"github.com/stretchr/testify/assert"
 )
 
