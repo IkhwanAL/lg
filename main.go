@@ -19,8 +19,6 @@ import (
 )
 
 type RootModel struct {
-	height      int
-	width       int
 	searchModel models.SearchModel
 	listModel   models.ListModel
 	helpModel   models.HelpModel
@@ -42,7 +40,6 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		searchPath = msg.Path
 		m.searchPath = searchPath
 	case tea.WindowSizeMsg:
-		log.Printf("Resize W %d, H %d", msg.Width, msg.Height)
 		m.searchModel.Width = msg.Width
 		m.listModel.Height = msg.Height - 4
 		m.listModel.Width = msg.Width
@@ -130,8 +127,24 @@ func benchmarkTest() {
 	return
 }
 
-func main() {
+func getArgsOption() *core.UserArgs {
+	args := os.Args[1:]
 
+	var userArgs core.UserArgs
+
+	for _, niceArgs := range args {
+		acceptedArgs := strings.Split(niceArgs, "=")
+
+		switch acceptedArgs[0] {
+		case "-openDir":
+			userArgs.OpenDirWith = acceptedArgs[1]
+		}
+	}
+
+	return &userArgs
+}
+
+func main() {
 	f, err := tea.LogToFile("debug.log", "debug")
 
 	if err != nil {
@@ -141,6 +154,8 @@ func main() {
 	log.SetOutput(f)
 
 	defer f.Close()
+
+	userArgs := getArgsOption()
 
 	width, height, err := getTerminalSize()
 	if err != nil {
@@ -156,9 +171,9 @@ func main() {
 
 	root := RootModel{
 		searchModel: models.NewSearchModel(width),
-		listModel:   models.NewListModel(width, height-4, dir+"/"),
+		listModel:   models.NewListModel(width, height-4, dir, userArgs),
 		helpModel:   models.NewHelpModel(),
-		searchPath:  dir + "/",
+		searchPath:  dir,
 	}
 
 	p := tea.NewProgram(root, tea.WithAltScreen())

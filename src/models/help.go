@@ -14,7 +14,12 @@ func (h HelpModel) Init() tea.Cmd {
 func (h HelpModel) View() string {
 	style := lipgloss.NewStyle().Foreground(lipgloss.Color("#808080"))
 
-	return style.Render("(↑/↓) to move the cursor; \t\t (Ctrl + Z) to go previous directory; \n(Enter) to go inside directory or open a file")
+	toRender := "(↑/↓) to move the cursor;" +
+		"\t\t\t\t\t\t (Ctrl + Z) to go previous directory;" + "\t (Enter) Open Directory" +
+		"\n(Tab) to go inside directory or open a file;" +
+		"\t(Ctrl + C) to exit program;"
+
+	return style.Render(toRender)
 }
 
 func (h HelpModel) Update() (HelpModel, tea.Cmd) {

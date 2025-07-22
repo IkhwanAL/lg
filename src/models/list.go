@@ -32,6 +32,7 @@ var normalStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("15"))
 
 type ListModel struct {
+	args     *core.UserArgs
 	Path     string
 	position int
 	cursor   int
@@ -52,13 +53,20 @@ func (m ListModel) OpenFile(path string) error {
 	switch runtime.GOOS {
 	case "windows":
 		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", path)
-	case "darwin":
-		cmd = exec.Command("open", path)
 	case "linux":
 		cmd = exec.Command("xdg-open", path)
 	default:
 		return fmt.Errorf("unsupported platform")
 	}
+
+	return cmd.Start()
+}
+
+func (m ListModel) OpenDir(path string) error {
+	var cmd *exec.Cmd
+
+	// log.Print(path, m.args.GetOpenDirArgs())
+	cmd = exec.Command(m.args.GetOpenDirArgs(), path)
 
 	return cmd.Start()
 }
@@ -105,7 +113,7 @@ func defaultList(path string) []core.FsEntry {
 		if v.IsDir() {
 			list = append(list, core.FsEntry{
 				Name: v.Name() + "/",
-				Path: filepath.FromSlash(path + "/" + v.Name() + "/"),
+				Path: filepath.FromSlash(path + "/" + v.Name()),
 				Type: core.Dir,
 			})
 			continue
@@ -148,21 +156,36 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		switch msg.Type {
 		case tea.KeyCtrlZ:
 			reversePath := filepath.Join(m.Path, "..")
+
 			return m, tea.Cmd(func() tea.Msg {
 				return core.PathMsg{Path: reversePath}
 			})
 		case tea.KeyEnter:
 			selectedPath := m.list[m.position]
-			if selectedPath.Type == core.Dir {
-				return m, tea.Cmd(func() tea.Msg {
-					return core.PathMsg{Path: selectedPath.Path}
-				})
-			}
 
+			if selectedPath.Type == core.Dir {
+				err := m.OpenDir(selectedPath.Path)
+
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				return m, nil
+			}
 			err := m.OpenFile(selectedPath.Path)
 
 			if err != nil {
 				log.Fatal(err)
+			}
+
+			return m, nil
+		case tea.KeyTab:
+			selectedPath := m.list[m.position]
+
+			if selectedPath.Type == core.Dir {
+				return m, tea.Cmd(func() tea.Msg {
+					return core.PathMsg{Path: selectedPath.Path}
+				})
 			}
 
 			return m, nil
@@ -217,12 +240,13 @@ func (m *ListModel) Move() {
 	}
 }
 
-func NewListModel(maxWidth int, height int, path string) ListModel {
+func NewListModel(maxWidth int, height int, path string, userArgs *core.UserArgs) ListModel {
 	list := defaultList(path)
 
 	maxHeight := min(20, height)
 
 	return ListModel{
+		args:     userArgs,
 		list:     list,
 		position: 0,
 		cursor:   0,

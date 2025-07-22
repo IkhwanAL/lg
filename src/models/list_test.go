@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/ikhwanal/lg-file/src/core"
@@ -81,4 +82,45 @@ func TestListPositionHeadTail(t *testing.T) {
 		return (list.tail-list.head)-1 < viewHeight
 	}, "After Press Key Up, The Length of Two Pointer is too big for View Height Argument")
 
+}
+
+func isValidPath(path string) bool {
+	if strings.HasSuffix(path, "/") {
+		return false
+	}
+
+	if strings.Contains(path, "//") {
+		return false
+	}
+
+	if strings.Contains(path, "/\\") {
+		return false
+	}
+
+	return true
+}
+
+func TestDirectoryList(t *testing.T) {
+	list := defaultList("./")
+
+	for _, v := range list {
+		if v.Type != core.Dir {
+			continue
+		}
+
+		assert.False(t, isValidPath(v.Path))
+		assert.DirExists(t, v.Path, "Directory not exist, something wrong with the path when open directory", v.Path)
+	}
+}
+
+func TestFileList(t *testing.T) {
+	list := defaultList("./")
+
+	for _, v := range list {
+		if v.Type != core.File {
+			continue
+		}
+
+		assert.FileExists(t, v.Path, "file cannot open, something wrong withg the path when open the file", v.Path)
+	}
 }
