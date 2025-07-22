@@ -1,6 +1,15 @@
 # What this Project About
 
-A Simple File Explorer In Terminal 
+A Simple File Explorer In Terminal
+
+###  Motivation
+
+the plan is use terminal to the max usage possible, like can i use everything in terminal. so that's the this idea came from a simple file explorer to look up file and directory in the current directory location and of course some basic utility like find file and open file.
+
+### Future Me Todo
+
+- Add Preview if its text related file (but it became beyond simple file explorer, but need to think about it)
+- Add Filter (like filter extension file)
 
 ## Example
 
@@ -28,11 +37,11 @@ You can specifiy Which architecture cpu you use like
 
 Quickest Way is by `go install github.com/ikhwanal/lg-file` and it will go to your go PATH bin
 
-##  Motivation
+## Args Can Be Used
 
-the plan is use terminal to the max usage possible, like can i use everything in terminal. so that's the this idea came from a simple file explorer to look up file and directory in the current directory location and of course some basic utility like find file and open file.
+`-openDir=string` this allow to open a directory with choosen app by default it will open file explorer
 
-## Future Me Todo
+e.g:
 
-- Add Preview if its text related file (but it became beyond simple file explorer, but need to think about it)
-- Add Filter (like filter extension file)
+`lg-file -openDir=code` open a directory with command code
+
