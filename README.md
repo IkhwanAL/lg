@@ -37,7 +37,7 @@ You can specifiy Which architecture cpu you use like
 
 Quickest Way is by `go install github.com/ikhwanal/lg-file` and it will go to your go PATH bin
 
-## Args Can Be Used
+## Command
 
 `-openDir=string` this allow to open a directory with choosen app, by default it will open file explorer
 
