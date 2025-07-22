@@ -39,7 +39,7 @@ Quickest Way is by `go install github.com/ikhwanal/lg-file` and it will go to yo
 
 ## Args Can Be Used
 
-`-openDir=string` this allow to open a directory with choosen app by default it will open file explorer
+`-openDir=string` this allow to open a directory with choosen app, by default it will open file explorer
 
 e.g:
 
