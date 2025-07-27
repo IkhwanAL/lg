@@ -33,6 +33,7 @@ var normalStyle = lipgloss.NewStyle().
 
 type ListModel struct {
 	args     *core.UserArgs
+	MaxView  int
 	Path     string
 	position int
 	cursor   int
@@ -89,7 +90,7 @@ func (m ListModel) View() string {
 		if value.Type == core.File {
 			aciiFsType = "[FILE] "
 		}
-
+		log.Printf("Head: %d, Tail %d, Val: %s", m.head, m.tail, value)
 		if m.cursor == itemIndex {
 			itemLists[itemIndex] = selectedStyle.Width(m.Width).Render(">" + aciiFsType + value.Name + ";")
 		} else {
@@ -152,6 +153,16 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		m.cursor = 0
 
 		// log.Printf("List Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
+	case tea.WindowSizeMsg:
+		log.Printf("Window Changes %d", msg.Height)
+		m.Height = min(len(m.list), msg.Height-4)
+		//m.Height = min(m.Height, m.MaxView)
+		if m.Height > m.MaxView {
+			m.Height = m.MaxView
+		}
+
+		m.tail = m.Height
+		return m, nil
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlZ:
@@ -160,6 +171,9 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 			return m, tea.Cmd(func() tea.Msg {
 				return core.PathMsg{Path: reversePath}
 			})
+		case tea.KeyCtrlN: // Create New File
+
+			return m, nil
 		case tea.KeyEnter:
 			selectedPath := m.list[m.position]
 
@@ -205,7 +219,6 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 			if m.list == nil {
 				return m, nil
 			}
-
 			maxCursorView := min(len(m.list), m.Height)
 
 			if m.cursor < maxCursorView-1 {
@@ -219,7 +232,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	}
 
 	m.Move()
-	// log.Printf("Move Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
+	log.Printf("Move Position %d, Head %d, Tail %d And Cursor %d, Total Items %d", m.position, m.head, m.tail, m.cursor, len(m.list))
 
 	return m, nil
 }
@@ -243,11 +256,12 @@ func (m *ListModel) Move() {
 func NewListModel(maxWidth int, height int, path string, userArgs *core.UserArgs) ListModel {
 	list := defaultList(path)
 
-	maxHeight := min(20, height)
-
+	//maxHeight := min(20, height)
+	maxHeight := min(len(list), height)
 	return ListModel{
 		args:     userArgs,
 		list:     list,
+		MaxView:  20,
 		position: 0,
 		cursor:   0,
 		Height:   maxHeight,

@@ -19,10 +19,12 @@ import (
 )
 
 type RootModel struct {
-	searchModel models.SearchModel
-	listModel   models.ListModel
-	helpModel   models.HelpModel
-	searchPath  string
+	openInputModel bool
+	searchPath     string
+	searchModel    models.SearchModel
+	inputModel     models.InputModel
+	listModel      models.ListModel
+	helpModel      models.HelpModel
 }
 
 func (m RootModel) Init() tea.Cmd {
@@ -40,19 +42,27 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		searchPath = msg.Path
 		m.searchPath = searchPath
 	case tea.WindowSizeMsg:
+		m.inputModel.Width = msg.Width
 		m.searchModel.Width = msg.Width
-		m.listModel.Height = msg.Height - 4
 		m.listModel.Width = msg.Width
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlC:
 			return m, tea.Quit
+		case tea.KeyCtrlN:
+			m.openInputModel = !m.openInputModel
+			return m, nil
 		}
 	}
 
-	m.searchModel.Path = searchPath
-	m.searchModel, cmd = m.searchModel.Update(msg)
-	cmds = append(cmds, cmd)
+	if m.openInputModel {
+		m.inputModel, cmd = m.inputModel.Update(msg)
+		cmds = append(cmds, cmd)
+	} else {
+		m.searchModel.Path = searchPath
+		m.searchModel, cmd = m.searchModel.Update(msg)
+		cmds = append(cmds, cmd)
+	}
 
 	m.listModel.Path = searchPath
 	m.listModel, cmd = m.listModel.Update(msg)
@@ -62,7 +72,15 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m RootModel) View() string {
-	return lipgloss.JoinVertical(0, m.searchModel.View(), m.listModel.View(), m.helpModel.View())
+	var input string
+
+	if m.openInputModel {
+		input = m.inputModel.View()
+	} else {
+		input = m.searchModel.View()
+	}
+
+	return lipgloss.JoinVertical(0, input, m.listModel.View(), m.helpModel.View())
 }
 
 func getTerminalSize() (int, int, error) {
@@ -171,9 +189,12 @@ func main() {
 
 	root := RootModel{
 		searchModel: models.NewSearchModel(width),
-		listModel:   models.NewListModel(width, height-4, dir, userArgs),
-		helpModel:   models.NewHelpModel(),
-		searchPath:  dir,
+		// listModel:   models.NewListModel(width, height-4, "C:/", userArgs),
+		listModel:  models.NewListModel(width, height-4, "D:/", userArgs),
+		inputModel: models.NewInputModel(width),
+		helpModel:  models.NewHelpModel(),
+		searchPath: dir,
+		// searchPath: "C:/",
 	}
 
 	p := tea.NewProgram(root, tea.WithAltScreen())
