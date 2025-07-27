@@ -153,7 +153,6 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 
 		// log.Printf("List Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
 	case tea.WindowSizeMsg:
-		log.Printf("i Have been Called Height %d, Length %d", msg.Height, len(m.list))
 		m.Height = min(len(m.list), msg.Height-4)
 
 		m.head = 0
