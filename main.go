@@ -133,6 +133,8 @@ func benchmarkTest() {
 	start = time.Now()
 	fsResults, _ = core.SearchFileV4("D:/", key)
 	fmt.Printf("Optimized Version took: %v, found %d files \n", time.Since(start).Milliseconds(), len(fsResults))
+	
+	return
 }
 
 func getArgsOption() *core.UserArgs {
