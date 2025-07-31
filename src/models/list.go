@@ -31,15 +31,20 @@ var normalStyle = lipgloss.NewStyle().
 	Padding(0, 2).Bold(true).
 	Foreground(lipgloss.Color("15"))
 
+// TODO Anyway The Height In ListModel struct is very tighly coupled
+// property if the heigth value is change
+// the head, tail, position, and cursor must change and react to Height changes
+
 type ListModel struct {
 	args     *core.UserArgs
+	MaxView  int
 	Path     string
-	position int
-	cursor   int
-	Height   int
+	position int // This Will Change To
+	cursor   int // This Will Change To
+	Height   int // Need To Test This If the Value Change
 	Width    int
-	tail     int
-	head     int
+	tail     int // This Will Change
+	head     int // and This Will Change
 	list     []core.FsEntry
 }
 
@@ -66,6 +71,7 @@ func (m ListModel) OpenDir(path string) error {
 	var cmd *exec.Cmd
 
 	// log.Print(path, m.args.GetOpenDirArgs())
+	log.Printf("Open Sesame %s, %s", m.args.GetOpenDirArgs(), path)
 	cmd = exec.Command(m.args.GetOpenDirArgs(), path)
 
 	return cmd.Start()
@@ -77,7 +83,7 @@ func (m ListModel) View() string {
 	if m.list == nil {
 		return normalStyle.Width(m.Width).Render("🔍 No files matched your search.")
 	}
-
+	
 	for i := m.head; i < m.tail; i++ {
 		value := m.list[i]
 
@@ -89,7 +95,6 @@ func (m ListModel) View() string {
 		if value.Type == core.File {
 			aciiFsType = "[FILE] "
 		}
-
 		if m.cursor == itemIndex {
 			itemLists[itemIndex] = selectedStyle.Width(m.Width).Render(">" + aciiFsType + value.Name + ";")
 		} else {
@@ -152,6 +157,14 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 		m.cursor = 0
 
 		// log.Printf("List Search: Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
+	case tea.WindowSizeMsg:
+		m.Height = min(len(m.list), msg.Height-4)
+
+		m.head = 0
+		m.cursor = 0
+		m.position = 0
+		m.tail = m.Height
+		return m, nil
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlZ:
@@ -160,6 +173,9 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 			return m, tea.Cmd(func() tea.Msg {
 				return core.PathMsg{Path: reversePath}
 			})
+		case tea.KeyCtrlN: // Create New File
+
+			return m, nil
 		case tea.KeyEnter:
 			selectedPath := m.list[m.position]
 
@@ -205,7 +221,6 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 			if m.list == nil {
 				return m, nil
 			}
-
 			maxCursorView := min(len(m.list), m.Height)
 
 			if m.cursor < maxCursorView-1 {
@@ -219,7 +234,7 @@ func (m ListModel) Update(msg tea.Msg) (ListModel, tea.Cmd) {
 	}
 
 	m.Move()
-	// log.Printf("Move Position %d, Head %d, Tail %d, Total Items %d", m.position, m.head, m.tail-1, len(m.list))
+	//log.Printf("Move Position %d, Head %d, Tail %d And Cursor %d, Total Items %d", m.position, m.head, m.tail, m.cursor, len(m.list))
 
 	return m, nil
 }
@@ -240,18 +255,27 @@ func (m *ListModel) Move() {
 	}
 }
 
+func (m *ListModel) OverrideList(list []core.FsEntry) {
+
+	m.list = list
+	m.tail = len(list)
+	m.head = 0
+}
+
 func NewListModel(maxWidth int, height int, path string, userArgs *core.UserArgs) ListModel {
 	list := defaultList(path)
 
-	maxHeight := min(20, height)
-
+	maxView := 20
+	maxHeight := min(maxView, height)
+	
 	return ListModel{
 		args:     userArgs,
 		list:     list,
+		MaxView:  maxView,
 		position: 0,
 		cursor:   0,
 		Height:   maxHeight,
-		tail:     min(maxHeight, len(list)),
+		tail:     len(list),
 		head:     0,
 		Width:    maxWidth,
 	}

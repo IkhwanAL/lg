@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -20,23 +21,6 @@ func SearchFile(key string) ([]string, error) {
 	}
 
 	var maxPathShow []string
-
-	// TODO
-	// Improve Search
-	// How to improve search if we search thousand directories
-	// does goroutine help?
-
-	// TODO
-	// do i need to consider adding C:/
-	// because C:/ has soo much private information that windows user shouldn't know
-	// It means lots of filtering that other partition shouldn't do
-
-	// TODO
-	// i should highlight directory name
-
-	// TODO
-	// I need to check their what partition they have
-	// or partition filter only allow to find in one partition
 	err := filepath.WalkDir("D:/", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -134,7 +118,9 @@ func SearchFileV2(key string) ([]string, error) {
 	return results, err
 }
 
-// 0.5s or < 1s
+// TODO i got hit in C:/ Which lots of access denied
+// If in one folder has lots of restriction or access denied folder
+// Turn off the one layer folder
 func SearchFileV3(path string, key string) ([]FsEntry, error) {
 	if key == "" {
 		return nil, errors.New("key is empty")
@@ -142,7 +128,7 @@ func SearchFileV3(path string, key string) ([]FsEntry, error) {
 
 	var wg sync.WaitGroup
 
-	ch := make(chan FsEntry)
+	ch := make(chan FsEntry, 10)
 
 	wg.Add(1)
 	go search(path, key, ch, &wg)
@@ -188,4 +174,39 @@ func search(rootDir string, fileToSearch string, result chan<- FsEntry, wg *sync
 			Path: filepath.ToSlash(rootDir + d.Name()),
 		}
 	}
+}
+
+// Not Ready
+func SearchFileV4(rootDir string, fileToSearch string) ([]FsEntry, error) {
+	var cmd *exec.Cmd
+
+	cmd = exec.Command("fd", fileToSearch, rootDir)
+
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := string(output)
+	files := strings.Split(strings.TrimSpace(results), "\n")
+
+	var finalResults []FsEntry
+
+	for _, lines := range files {
+		stat, err := os.Lstat(lines)
+
+		if err != nil {
+			log.Printf("Failed Fetch File information %v", err)
+			continue
+		}
+
+		finalResults = append(finalResults, FsEntry{
+			Name: stat.Name(),
+			Type: File,
+			Path: rootDir + stat.Name(),
+		})
+	}
+
+	return finalResults, nil
 }

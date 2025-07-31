@@ -9,15 +9,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func generateTestFile() []core.FsEntry {
-	list := make([]core.FsEntry, 24)
+func generateTestFile(totalFile int) []core.FsEntry {
+	list := make([]core.FsEntry, totalFile)
+	for i := range totalFile {
 
-	for i := range 24 {
-		list = append(list, core.FsEntry{
+		list[i] = core.FsEntry{
 			Name: fmt.Sprintf("File %d", i),
 			Type: core.File,
 			Path: "./",
-		})
+		}
 	}
 
 	return list
@@ -28,7 +28,7 @@ A Test For Verifying Head Tail Movement
 */
 func TestListPositionHeadTail(t *testing.T) {
 
-	TEST_FILE := generateTestFile()
+	TEST_FILE := generateTestFile(24)
 
 	tail := len(TEST_FILE)
 	position := 0
@@ -123,4 +123,16 @@ func TestFileList(t *testing.T) {
 
 		assert.FileExists(t, v.Path, "file cannot open, something wrong withg the path when open the file", v.Path)
 	}
+}
+
+func TestRunningListModel(t *testing.T) {
+	testFile := generateTestFile(9);
+
+	model := NewListModel(120, 35, "./", &core.UserArgs{})
+
+	model.OverrideList(testFile)
+
+	assert.Condition(t, func() (success bool) {
+		return model.tail == len(model.list)
+	}, "Tail cannot bigger than total Height")
 }

@@ -19,10 +19,11 @@ import (
 )
 
 type RootModel struct {
-	searchModel models.SearchModel
-	listModel   models.ListModel
-	helpModel   models.HelpModel
-	searchPath  string
+	searchPath     string
+	searchModel    models.SearchModel
+	inputModel     models.InputModel
+	listModel      models.ListModel
+	helpModel      models.HelpModel
 }
 
 func (m RootModel) Init() tea.Cmd {
@@ -40,8 +41,8 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		searchPath = msg.Path
 		m.searchPath = searchPath
 	case tea.WindowSizeMsg:
+		m.inputModel.Width = msg.Width
 		m.searchModel.Width = msg.Width
-		m.listModel.Height = msg.Height - 4
 		m.listModel.Width = msg.Width
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -62,7 +63,11 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m RootModel) View() string {
-	return lipgloss.JoinVertical(0, m.searchModel.View(), m.listModel.View(), m.helpModel.View())
+	var input string
+
+	input = m.searchModel.View()
+
+	return lipgloss.JoinVertical(0, input, m.listModel.View(), m.helpModel.View())
 }
 
 func getTerminalSize() (int, int, error) {
@@ -124,7 +129,10 @@ func benchmarkTest() {
 	fsResults, _ := core.SearchFileV3("D:/", key)
 	fmt.Printf("Very Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(fsResults))
 
-	return
+	fmt.Println("Optimized Version Fd...")
+	start = time.Now()
+	fsResults, _ = core.SearchFileV4("D:/", key)
+	fmt.Printf("Optimized Version took: %v, found %d files \n", time.Since(start).Milliseconds(), len(fsResults))
 }
 
 func getArgsOption() *core.UserArgs {
@@ -171,9 +179,11 @@ func main() {
 
 	root := RootModel{
 		searchModel: models.NewSearchModel(width),
-		listModel:   models.NewListModel(width, height-4, dir, userArgs),
-		helpModel:   models.NewHelpModel(),
-		searchPath:  dir,
+		listModel:  models.NewListModel(width, height-4, dir, userArgs),
+		inputModel: models.NewInputModel(width),
+		helpModel:  models.NewHelpModel(),
+		searchPath: dir,
+		// searchPath: "C:/",
 	}
 
 	p := tea.NewProgram(root, tea.WithAltScreen())
