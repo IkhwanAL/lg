@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -173,4 +174,39 @@ func search(rootDir string, fileToSearch string, result chan<- FsEntry, wg *sync
 			Path: filepath.ToSlash(rootDir + d.Name()),
 		}
 	}
+}
+
+// Not Ready
+func SearchFileV4(rootDir string, fileToSearch string) ([]FsEntry, error) {
+	var cmd *exec.Cmd
+
+	cmd = exec.Command("fd", fileToSearch, rootDir)
+
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := string(output)
+	files := strings.Split(strings.TrimSpace(results), "\n")
+
+	var finalResults []FsEntry
+
+	for _, lines := range files {
+		stat, err := os.Lstat(lines)
+
+		if err != nil {
+			log.Printf("Failed Fetch File information %v", err)
+			continue
+		}
+
+		finalResults = append(finalResults, FsEntry{
+			Name: stat.Name(),
+			Type: File,
+			Path: rootDir + stat.Name(),
+		})
+	}
+
+	return finalResults, nil
 }

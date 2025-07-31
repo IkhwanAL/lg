@@ -19,7 +19,6 @@ import (
 )
 
 type RootModel struct {
-	openInputModel bool
 	searchPath     string
 	searchModel    models.SearchModel
 	inputModel     models.InputModel
@@ -49,20 +48,12 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.Type {
 		case tea.KeyCtrlC:
 			return m, tea.Quit
-		case tea.KeyCtrlN:
-			m.openInputModel = !m.openInputModel
-			return m, nil
 		}
 	}
 
-	if m.openInputModel {
-		m.inputModel, cmd = m.inputModel.Update(msg)
-		cmds = append(cmds, cmd)
-	} else {
-		m.searchModel.Path = searchPath
-		m.searchModel, cmd = m.searchModel.Update(msg)
-		cmds = append(cmds, cmd)
-	}
+	m.searchModel.Path = searchPath
+	m.searchModel, cmd = m.searchModel.Update(msg)
+	cmds = append(cmds, cmd)
 
 	m.listModel.Path = searchPath
 	m.listModel, cmd = m.listModel.Update(msg)
@@ -74,11 +65,7 @@ func (m RootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m RootModel) View() string {
 	var input string
 
-	if m.openInputModel {
-		input = m.inputModel.View()
-	} else {
-		input = m.searchModel.View()
-	}
+	input = m.searchModel.View()
 
 	return lipgloss.JoinVertical(0, input, m.listModel.View(), m.helpModel.View())
 }
@@ -142,7 +129,10 @@ func benchmarkTest() {
 	fsResults, _ := core.SearchFileV3("D:/", key)
 	fmt.Printf("Very Optimized search took: %v, found %d files\n", time.Since(start).Milliseconds(), len(fsResults))
 
-	return
+	fmt.Println("Optimized Version Fd...")
+	start = time.Now()
+	fsResults, _ = core.SearchFileV4("D:/", key)
+	fmt.Printf("Optimized Version took: %v, found %d files \n", time.Since(start).Milliseconds(), len(fsResults))
 }
 
 func getArgsOption() *core.UserArgs {
@@ -189,8 +179,7 @@ func main() {
 
 	root := RootModel{
 		searchModel: models.NewSearchModel(width),
-		// listModel:   models.NewListModel(width, height-4, "C:/", userArgs),
-		listModel:  models.NewListModel(width, height-4, "D:/", userArgs),
+		listModel:  models.NewListModel(width, height-4, dir, userArgs),
 		inputModel: models.NewInputModel(width),
 		helpModel:  models.NewHelpModel(),
 		searchPath: dir,

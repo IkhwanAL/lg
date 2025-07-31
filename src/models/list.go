@@ -31,16 +31,20 @@ var normalStyle = lipgloss.NewStyle().
 	Padding(0, 2).Bold(true).
 	Foreground(lipgloss.Color("15"))
 
+// TODO Anyway The Height In ListModel struct is very tighly coupled
+// property if the heigth value is change
+// the head, tail, position, and cursor must change and react to Height changes
+
 type ListModel struct {
 	args     *core.UserArgs
 	MaxView  int
 	Path     string
-	position int
-	cursor   int
-	Height   int
+	position int // This Will Change To
+	cursor   int // This Will Change To
+	Height   int // Need To Test This If the Value Change
 	Width    int
-	tail     int
-	head     int
+	tail     int // This Will Change
+	head     int // and This Will Change
 	list     []core.FsEntry
 }
 
@@ -67,6 +71,7 @@ func (m ListModel) OpenDir(path string) error {
 	var cmd *exec.Cmd
 
 	// log.Print(path, m.args.GetOpenDirArgs())
+	log.Printf("Open Sesame %s, %s", m.args.GetOpenDirArgs(), path)
 	cmd = exec.Command(m.args.GetOpenDirArgs(), path)
 
 	return cmd.Start()
@@ -78,7 +83,7 @@ func (m ListModel) View() string {
 	if m.list == nil {
 		return normalStyle.Width(m.Width).Render("🔍 No files matched your search.")
 	}
-
+	
 	for i := m.head; i < m.tail; i++ {
 		value := m.list[i]
 
@@ -250,12 +255,19 @@ func (m *ListModel) Move() {
 	}
 }
 
+func (m *ListModel) OverrideList(list []core.FsEntry) {
+
+	m.list = list
+	m.tail = len(list)
+	m.head = 0
+}
+
 func NewListModel(maxWidth int, height int, path string, userArgs *core.UserArgs) ListModel {
 	list := defaultList(path)
 
 	maxView := 20
-
 	maxHeight := min(maxView, height)
+	
 	return ListModel{
 		args:     userArgs,
 		list:     list,
@@ -263,7 +275,7 @@ func NewListModel(maxWidth int, height int, path string, userArgs *core.UserArgs
 		position: 0,
 		cursor:   0,
 		Height:   maxHeight,
-		tail:     maxHeight,
+		tail:     len(list),
 		head:     0,
 		Width:    maxWidth,
 	}
