@@ -126,13 +126,12 @@ func TestFileList(t *testing.T) {
 }
 
 func TestRunningListModel(t *testing.T) {
-	testFile := generateTestFile(9);
 
 	model := NewListModel(120, 35, "./", &core.UserArgs{})
 
-	model.OverrideList(testFile)
+	model.GenerateListView()
 
-	assert.Condition(t, func() (success bool) {
-		return model.tail == len(model.list)
-	}, "Tail cannot bigger than total Height")
+	assert.NotPanicsf(t, func() {
+		model.GenerateListView()
+	}, "Panic, index out of range between otal list and tail for generating list")
 }

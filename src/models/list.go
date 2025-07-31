@@ -77,13 +77,9 @@ func (m ListModel) OpenDir(path string) error {
 	return cmd.Start()
 }
 
-func (m ListModel) View() string {
+func (m ListModel) GenerateListView() []string {
 	itemLists := make([]string, m.Height)
 
-	if m.list == nil {
-		return normalStyle.Width(m.Width).Render("🔍 No files matched your search.")
-	}
-	
 	for i := m.head; i < m.tail; i++ {
 		value := m.list[i]
 
@@ -101,6 +97,17 @@ func (m ListModel) View() string {
 			itemLists[itemIndex] = normalStyle.Width(m.Width).Render(aciiFsType + value.Name + ";")
 		}
 	}
+
+	return itemLists
+}
+
+func (m ListModel) View() string {
+	if m.list == nil {
+		return normalStyle.Width(m.Width).Render("🔍 No files matched your search.")
+	}
+	
+	itemLists := m.GenerateListView()
+
 	return strings.Join(itemLists, "\n")
 }
 
